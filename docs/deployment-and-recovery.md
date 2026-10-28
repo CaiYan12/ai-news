@@ -1,24 +1,31 @@
 # 发布与恢复
 
-独立项目的 `.github/workflows/pages.yml` 对 main 的推送执行冻结安装、类型检查、构建及 Chromium 阅读和取数测试，然后上传 `dist` 并部署到 GitHub Pages。Pull request 执行检查但不部署。站点地址为 <https://caiyan12.github.io/ai-news/>；`vite.config.ts` 的 base 是 `/ai-news/`。使用仓库 Settings → Pages 的 GitHub Actions 发布源。部署状态与站点实际内容都应核验，流水线成功本身不证明浏览器可用。
+独立仓库的 `.github/workflows/pages.yml` 对 `main` 推送或手动触发执行冻结安装、类型检查、构建、Chromium 阅读与取数检查，并部署 `dist`；PR 只检查。GitHub Pages 发布源为 GitHub Actions，地址为 <https://caiyan12.github.io/ai-news/>。查看运行时应核对实际 SHA、构建及部署结果，并在浏览器验证资源、阅读和导航；HTTP 200 与 CI 成功都不能单独证明功能可用。
 
-切换或恢复前保存当前主站成功 Pages 运行的提交、artifact、校验值，以及可用的独立站部署提交。旧主站产物是整个站点，不是仅日报的备份；重新部署整个旧产物可能覆盖之后的主站更新。避免强推或重置任一仓库，也不要清空用户浏览器存储。
+## 恢复独立项目
 
-本次切换前留存的主站运行是 [40640553498](https://github.com/CaiYan12/caiyan12.github.io/actions/runs/40640553498)，提交 `80fee3da65c2c34975d99d69775d70083d8d5f55`，artifact ID `12795366450`。下载并验证后的文件及清单保存在站长的迁移证据目录，包含旧日报与主站全部资源；应在后续需要时重新确认备份可用及有效期。恢复出的产物已在本地浏览器演练旧日报阅读，尚未实际进行线上回滚。
-
-出现关键故障时，先记录正在服务的 URL、部署和异常。可在独立仓库 Pages 设置中取消发布当前项目站点，再检查原地址实际返回哪个产物；GitHub 的文档没有保证此重叠路径的回退顺序。在 T6 清理主站之前，若主站 main 仍包含旧日报，可以从主站 Actions 的 `Deploy to GitHub Pages` 手动运行工作流重建并部署当前 main；它会构建整个主站，且依赖构建期取数，产物不等同于已保存的旧 artifact。
-
-另一条可尝试路径是重跑上述旧运行的部署 job。先确认当前主站与整个旧产物的差异，并检查 artifact 仍未过期；该 artifact 当时的到期时间为 `2026-10-29T05:54:37Z`。以下命令选中的数据库 job ID 来自 `gh run view`，重跑会影响整个主站：
+2026-10-28 两次受控演练删除独立 Pages 配置后，重建 workflow 配置并手动触发 `main`，成功恢复独立应用；第二次成功运行是 [40661911730](https://github.com/CaiYan12/ai-news/actions/runs/40661911730)，SHA `9a1fd00f1564954946733aafa970f1bb3c9c3c5e`。恢复后禁用浏览器缓存检查了新文档身份、两视口阅读、真实 RSS 和列表图片。实际步骤须先确认期望的 `main` SHA 与仓库状态；删除、重建和部署会影响线上服务。
 
 ```powershell
-gh api repos/CaiYan12/caiyan12.github.io/actions/artifacts/12795366450 --jq '{expired,expires_at,digest}'
-gh run view 40640553498 --repo CaiYan12/caiyan12.github.io --json jobs --jq '.jobs[] | {name,databaseId}'
-gh run rerun 40640553498 --repo CaiYan12/caiyan12.github.io --job 122657956807
-gh run watch 40640553498 --repo CaiYan12/caiyan12.github.io
+gh api repos/CaiYan12/ai-news/pages
+gh api repos/CaiYan12/ai-news/commits/main --jq .sha
 ```
 
-`gh run rerun --help` 说明指定 job 时包含依赖；是否复用原 artifact、是否重新构建及项目站点取消发布后实际路径如何回退，均须根据运行日志与线上结果确认，不能预先宣称此命令已完成恢复。GitHub 只允许在原运行后 30 天内重跑，artifact 也可能更早过期。保存在本地的 tar 和逐文件清单已完成本地恢复演练，但目前没有验证过直接将此本地 tar 重新上传部署的流程；它不能被当成已验证的线上恢复命令。
+仅在确认 Pages 配置不存在、且需要恢复时创建；已存在则跳过 POST。随后触发 workflow 并读取这次新运行的 ID 和结果：
 
-恢复后逐项验证主站、日报资源、旧详情直达和阅读交互，并记录缓存传播延迟及实际结果。项目站点可通过成功的 Actions 部署重新发布。上述线上切换和回滚的可用性必须以实际结果为准，不承诺零中断。
+```powershell
+gh api --method POST repos/CaiYan12/ai-news/pages -f build_type=workflow
+gh api --method POST repos/CaiYan12/ai-news/actions/workflows/pages.yml/dispatches -f ref=main
+gh run list --repo CaiYan12/ai-news --workflow pages.yml --limit 5
+gh run watch <实际运行ID> --repo CaiYan12/ai-news
+```
 
-GitHub 官方说明：[自定义 Pages workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)、[取消发布和重新发布](https://docs.github.com/en/pages/getting-started-with-github-pages/unpublishing-a-github-pages-site)、[重跑工作流与 job](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/re-run-workflows-and-jobs)。
+写入遇到 EOF 时先回读配置和运行列表，确认是否已经生效再决定重试。部署后核对实际 HTML 和资源身份，并在隔离浏览器检查实时源、列表、详情、收藏、导航与主站往返。边缘缓存传播并非原子操作，可能短时返回不同版本；记录时间、响应头和浏览器实际版本。
+
+## 旧主站恢复的边界
+
+两次删除配置后外部请求曾观察到旧主站 HTML，但生产浏览器即使禁用 CDP 缓存仍取得新 HTML；旧生产版本实际执行、旧版写入及跨版回写 **未验证**。本地同 origin 的真实旧→新→旧产物及数据回写实验通过，不能替代线上回滚证明。详细证据见 [迁移证据](migration-evidence.md)。
+
+主站清理提交 `e683da0ed62fcf5e1f54ee93d9db3d560e7ad926` 上线后，当前主站构建已不含旧日报。若需要尝试从源码恢复旧版，先核对主站后续提交及依赖，正常 revert 清理提交并运行主站检查、构建和 Pages 部署；这会影响整个主站，恢复路线尚未演练，原入口实际返回内容也必须再验证。不要假设仅取消发布独立站即可恢复旧版。保留的旧 artifact 包含整个主站且有到期时间；本地备份直接上传部署以及重跑旧 job 是否复用原 artifact 均未验证，不作为已验证的恢复命令。
+
+不强推或重置仓库，不清空读者存储。恢复后分别核对主站、日报资源、详情直达、阅读及状态，记录未通过项。官方资料：[自定义 Pages workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)、[取消发布和重新发布](https://docs.github.com/en/pages/getting-started-with-github-pages/unpublishing-a-github-pages-site)。
