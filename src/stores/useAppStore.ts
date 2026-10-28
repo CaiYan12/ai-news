@@ -257,6 +257,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 				articles,
 				history,
 				dataSource: "live",
+				refreshing: false,
 				lastRefreshedAt: new Date().toISOString(),
 			});
 			if (added > 0) useToastStore.getState().show(`已更新 ${added} 条`);
