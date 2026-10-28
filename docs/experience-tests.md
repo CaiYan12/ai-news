@@ -1,0 +1,9 @@
+# Reader experience checks
+
+Run `pnpm install --frozen-lockfile`, `pnpm check`, and `pnpm build` first. `pnpm test:experience` exercises the production browser interface at desktop and narrow widths; `pnpm test:motion` records route state, animation events, browser errors and Chromium screencast frames for normal, reduced-motion and unsupported View Transitions paths. Both use the bundled feed and a controlled substitute for remote images. They do not test the availability or appearance of remote media.
+
+`pnpm test:visual` records the five templates, two color schemes and list/detail views at both widths. By default it tests the new build alone. For an optional historical comparison, set `AI_NEWS_OLD_DIST` to an old site dist containing `ai-news/`, set `AI_NEWS_EVIDENCE` to an output directory, run `pnpm test:visual`, then run `node tests/compare-matrix.mjs <output-directory>`. The comparison requires 40 pairs and reports raw pixel differences, dimensions, text, layout metrics, title and refresh state. It explicitly expects the previously approved old-disabled/new-enabled refresh difference; it does not declare the images pixel-identical.
+
+`AI_NEWS_EVIDENCE` selects the output directory for each test. These scripts start isolated local servers and browser contexts, use a fixed clock and the same snapshot, and do not use a personal browser profile. `AI_NEWS_MUTATE_FEED=1 pnpm test:experience` deliberately removes one feed item at the external response boundary: the expected ten-item count must fail, demonstrating sensitivity of the count assertion.
+
+`AI_NEWS_HOLD_TRANSITION=1 pnpm test:motion` adds a controlled browser transition timing: delay the first callback, navigate back, release it, and revisit the same detail before the old transition finishes. The visible list and detail are the assertions; trace events and screenshots document the sequence. `AI_NEWS_OLD_DIST` can also be supplied to reproduce the old behavior for comparison.

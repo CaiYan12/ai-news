@@ -157,7 +157,7 @@ let refreshTimer: ReturnType<typeof setInterval> | null = null;
 /** 是否为「应用内跳转」产生的历史记录：决定返回按钮走 history.back() 还是直接改 hash */
 let pushedWithinApp = false;
 /** 在途路由切换的目标 hash：openArticle 直发与 hashchange 回读会先后到达同一目标，去重 */
-let pendingRoute: string | null = null;
+let pendingRoute: { target: string } | null = null;
 
 export const useAppStore = create<AppState>((set, get) => ({
 	ready: false,
@@ -329,22 +329,29 @@ export const useAppStore = create<AppState>((set, get) => ({
 		const target = routeToHash(route);
 		// 同一路由的重复更新直接跳过：openArticle 直发 transition 后 hashchange 会再回读一次
 		// （此时 flushSync 尚未执行、get().route 还是旧值，须比对在途目标而非当前 state）
-		if (routeToHash(get().route) === target || pendingRoute === target)
+		if (routeToHash(get().route) === target || pendingRoute?.target === target)
 			return;
 		const reduce = window.matchMedia(
 			"(prefers-reduced-motion: reduce)",
 		).matches;
 		if (!reduce && typeof document.startViewTransition === "function") {
-			pendingRoute = target;
+			const pending = { target };
+			pendingRoute = pending;
 			const vt = document.startViewTransition(() => {
-				flushSync(() => set({ route }));
+				// The URL may have changed while the browser was preparing its snapshot.
+				// Do not apply a stale destination after a quick back/forward navigation.
+				if (routeToHash(currentRoute()) === target) {
+					flushSync(() => set({ route }));
+				} else if (pendingRoute === pending) {
+					pendingRoute = null;
+				}
 			});
 			// 快速连续导航时新 transition 会打断旧的（浏览器跳过其动画），
 			// 被打断的 ready/finished 随之 reject —— 捕获以避免 unhandled rejection
 			vt.ready.catch(() => {});
 			vt.finished.catch(() => {});
 			vt.finished.finally(() => {
-				if (pendingRoute === target) pendingRoute = null;
+				if (pendingRoute === pending) pendingRoute = null;
 			});
 		} else {
 			set({ route });
