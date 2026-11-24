@@ -13,7 +13,9 @@ export type JuyaStyleVariantId =
 	| "newsprint90s-light"
 	| "newsprint90s-dark"
 	| "synthwave-light"
-	| "synthwave-dark";
+	| "synthwave-dark"
+	| "nocturne-light"
+	| "nocturne-dark";
 
 export interface JuyaStyleMeta {
 	/** 变体唯一 id：`${styleId}-${colorScheme}` */
@@ -108,6 +110,22 @@ export const JUYA_STYLES: JuyaStyleMeta[] = [
 		name: "蒸汽梦核式",
 		colorScheme: "dark",
 		focusColor: "#b89aff",
+		background: "css-svg",
+	},
+	{
+		id: "nocturne-light",
+		styleId: "nocturne",
+		name: "暗夜精修式",
+		colorScheme: "light",
+		focusColor: "#4f5ed8",
+		background: "css-svg",
+	},
+	{
+		id: "nocturne-dark",
+		styleId: "nocturne",
+		name: "暗夜精修式",
+		colorScheme: "dark",
+		focusColor: "#8b97ff",
 		background: "css-svg",
 	},
 ];
