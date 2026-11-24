@@ -42,7 +42,7 @@ export interface LayoutConfig {
 
 /** 橘鸦定制阅读风格标识。'off' 回退通用阅读页；'card' 与旧 'dreamcore' 仅保留为存储迁移值。 */
 export type JuyaStyleId =
-	"off" | "card" | "folio" | "y2k" | "pop" | "newsprint90s" | "synthwave" | "nocturne";
+	"off" | "card" | "folio" | "y2k" | "pop" | "newsprint90s" | "synthwave" | "nocturne" | "editorial" | "wabi";
 
 /** 列表筛选维度 */
 export type FilterKind = "all" | "unread" | "favorite" | "readLater";

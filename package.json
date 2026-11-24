@@ -16,7 +16,8 @@
     "test:visual": "node tests/visual-matrix.mjs",
     "test:visual-config": "node tests/visual-matrix-config.mjs",
     "test:juya-folio": "node tests/juya-folio.mjs",
-    "test:juya-nocturne": "node tests/juya-nocturne.mjs"
+    "test:juya-nocturne": "node tests/juya-nocturne.mjs",
+    "test:juya-editorial-wabi": "node tests/juya-editorial-wabi.mjs"
   },
   "dependencies": {
     "dompurify": "3.4.16",

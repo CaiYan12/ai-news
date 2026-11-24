@@ -1,7 +1,7 @@
 import type { JuyaStyleId } from "../shared/types";
 
 /** 橘鸦定制阅读风格注册表（内置、只读，不进主题体系）。
- *  五种可选风格 × 亮暗双变体。旧 card 偏好在存储读取时迁移，不再进入运行时注册表。 */
+ *  八种可选风格 × 亮暗双变体。旧 card 偏好在存储读取时迁移，不再进入运行时注册表。 */
 
 export type JuyaStyleVariantId =
 	| "folio-light"
@@ -15,7 +15,11 @@ export type JuyaStyleVariantId =
 	| "synthwave-light"
 	| "synthwave-dark"
 	| "nocturne-light"
-	| "nocturne-dark";
+	| "nocturne-dark"
+	| "editorial-light"
+	| "editorial-dark"
+	| "wabi-light"
+	| "wabi-dark";
 
 export interface JuyaStyleMeta {
 	/** 变体唯一 id：`${styleId}-${colorScheme}` */
@@ -126,6 +130,38 @@ export const JUYA_STYLES: JuyaStyleMeta[] = [
 		name: "暗夜精修式",
 		colorScheme: "dark",
 		focusColor: "#8b97ff",
+		background: "css-svg",
+	},
+	{
+		id: "editorial-light",
+		styleId: "editorial",
+		name: "杂志编辑式",
+		colorScheme: "light",
+		focusColor: "#8a2f2b",
+		background: "css-svg",
+	},
+	{
+		id: "editorial-dark",
+		styleId: "editorial",
+		name: "杂志编辑式",
+		colorScheme: "dark",
+		focusColor: "#d08a7d",
+		background: "css-svg",
+	},
+	{
+		id: "wabi-light",
+		styleId: "wabi",
+		name: "侘寂日杂式",
+		colorScheme: "light",
+		focusColor: "#a5654a",
+		background: "css-svg",
+	},
+	{
+		id: "wabi-dark",
+		styleId: "wabi",
+		name: "侘寂日杂式",
+		colorScheme: "dark",
+		focusColor: "#c99a7d",
 		background: "css-svg",
 	},
 ];
