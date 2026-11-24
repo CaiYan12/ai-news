@@ -4,17 +4,32 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 import assert from "node:assert/strict";
 
-// Optional historical comparison: AI_NEWS_OLD_DIST is the old site's dist root.
-const oldRoot = process.env.AI_NEWS_OLD_DIST && resolve(process.env.AI_NEWS_OLD_DIST);
-const newRoot = resolve("dist");
+// Historical comparisons must pair the old site with an explicit pre-theme web build.
+const oldDist = process.env.AI_NEWS_OLD_DIST;
+const preThemeDist = process.env.AI_NEWS_PRE_THEME_DIST;
+if (Boolean(oldDist) !== Boolean(preThemeDist)) {
+  throw new Error("Historical visual comparison requires both AI_NEWS_OLD_DIST and AI_NEWS_PRE_THEME_DIST.");
+}
+const historicalComparison = Boolean(oldDist && preThemeDist);
+const oldRoot = historicalComparison ? resolve(oldDist) : null;
+const preThemeRoot = historicalComparison ? resolve(preThemeDist) : null;
+if (historicalComparison && oldRoot === preThemeRoot) {
+  throw new Error("AI_NEWS_OLD_DIST and AI_NEWS_PRE_THEME_DIST must point to different dist roots.");
+}
+const currentRoot = resolve("dist");
+const currentStyles = ["folio", "y2k", "pop", "newsprint90s", "dreamcore"];
+const historicalStyles = ["card", "y2k", "pop", "newsprint90s", "dreamcore"];
+const styles = historicalComparison ? historicalStyles : currentStyles;
+const versions = historicalComparison ? ["old", "pre-theme"] : ["current"];
 const output = resolve(process.env.AI_NEWS_EVIDENCE || "test-results/visual-matrix");
 await mkdir(output, { recursive: true });
-let historical = false;
+let activeVersion = "current";
 const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".xml": "application/xml", ".webp": "image/webp" };
 const server = createServer(async (req, res) => {
   const path = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
-  const root = historical ? oldRoot : newRoot;
-  const relative = path === "/ai-news/" ? (historical ? "ai-news/index.html" : "index.html") : (historical ? path.slice(1) : path.replace(/^\/ai-news\//, ""));
+  const usesOldSiteLayout = activeVersion === "old";
+  const root = activeVersion === "old" ? oldRoot : activeVersion === "pre-theme" ? preThemeRoot : currentRoot;
+  const relative = path === "/ai-news/" ? (usesOldSiteLayout ? "ai-news/index.html" : "index.html") : (usesOldSiteLayout ? path.slice(1) : path.replace(/^\/ai-news\//, ""));
   const file = resolve(root, relative);
   if (!file.startsWith(root + sep)) return res.writeHead(404).end();
   try { res.writeHead(200, { "content-type": mime[extname(file)] || "application/octet-stream" }).end(await readFile(file)); }
@@ -28,11 +43,11 @@ const browser = await chromium.launch();
 const results = [];
 try {
   for (const viewport of [{width:1280,height:900}, {width:390,height:844}]) {
-    for (const style of ["card", "folio", "y2k", "pop", "newsprint90s", "dreamcore"]) {
+    for (const style of styles) {
       for (const scheme of ["light", "dark"]) {
         if (process.env.AI_NEWS_CASE && `${viewport.width}x${viewport.height}-${style}-${scheme}` !== process.env.AI_NEWS_CASE) continue;
-        for (const version of oldRoot ? ["old", "new"] : ["new"]) {
-          historical = version === "old";
+        for (const version of versions) {
+          activeVersion = version;
           const context = await browser.newContext({viewport, colorScheme:scheme, reducedMotion:"reduce"});
           const page = await context.newPage();
           const errors = [], imageUrls = [];
@@ -62,7 +77,7 @@ try {
               await page.locator('[data-zoom-content] [data-juya-variant]').first().waitFor();
             }
             const variant = await page.locator('[data-juya-variant]').first().getAttribute('data-juya-variant');
-            assert.equal(variant, `${style === "card" ? "folio" : style}-${scheme}`);
+            assert.equal(variant, `${style}-${scheme}`);
             const id = `${viewport.width}x${viewport.height}-${style}-${scheme}-${view}-${version}`;
             await page.screenshot({path:resolve(output, `${id}.png`), fullPage:true, animations:"disabled"});
             const metrics = await page.evaluate(() => {
@@ -77,7 +92,7 @@ try {
     }
   }
   await writeFile(resolve(output,"metrics.json"), JSON.stringify(results,null,2));
-  assert.equal(results.length, (process.env.AI_NEWS_CASE ? 2 : 48) * (oldRoot ? 2 : 1));
+  assert.equal(results.length, (process.env.AI_NEWS_CASE ? 2 : 40) * versions.length);
   assert.deepEqual(results.flatMap(r => r.errors.map(e => `${r.id}: ${e}`)), []);
   console.log(`PASS captured ${results.length} rendered views; evidence: ${output}`);
 } finally { await browser.close(); await new Promise(r => server.close(r)); }

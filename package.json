@@ -14,6 +14,7 @@
     "test:experience": "node tests/experience.mjs",
     "test:motion": "node tests/navigation-motion.mjs",
     "test:visual": "node tests/visual-matrix.mjs",
+    "test:visual-config": "node tests/visual-matrix-config.mjs",
     "test:juya-folio": "node tests/juya-folio.mjs"
   },
   "dependencies": {

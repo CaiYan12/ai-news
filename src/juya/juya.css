@@ -342,65 +342,6 @@
    变体调色板（10 个）。自绘背景：纯 CSS 渐变/重复图案 + 内联 SVG data URI。
    ========================================================================== */
 
-/* ---- 卡片主题式 ---- */
-[data-juya-variant="card-light"] {
-  --jy-bg: #f6f1e7;
-  background-image: radial-gradient(rgba(193, 80, 46, 0.07) 1px, transparent 1.5px);
-  background-size: 18px 18px;
-  --jy-card: #fffdf8;
-  --jy-border: #e7ddc9;
-  --jy-heading: #33302a;
-  --jy-text: #43403a;
-  --jy-muted: #8a8172;
-  --jy-accent: #c1502e;
-  --jy-on-accent: #ffffff;
-  --jy-link: #a8431f;
-  --jy-lead-bg: #f3ecdd;
-  --jy-focus: #c1502e;
-  --jy-radius: 12px;
-}
-
-[data-juya-variant="card-dark"] {
-  --jy-bg: #1d1b17;
-  background-image: radial-gradient(rgba(240, 160, 128, 0.06) 1px, transparent 1.5px);
-  background-size: 18px 18px;
-  --jy-card: #2a2721;
-  --jy-border: #3d382f;
-  --jy-heading: #f2ede3;
-  --jy-text: #cfc8ba;
-  --jy-muted: #8f8676;
-  --jy-accent: #e0764f;
-  --jy-on-accent: #201511;
-  --jy-link: #f0a080;
-  --jy-lead-bg: #242119;
-  --jy-focus: #f0a080;
-  --jy-radius: 12px;
-}
-
-.jycard .juya-entry {
-  background: var(--jy-card);
-  border: 1px solid var(--jy-border);
-  border-radius: var(--jy-radius);
-  padding: 18px 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.jycard .juya-masthead {
-  background: var(--jy-accent);
-  color: var(--jy-on-accent);
-  border-radius: var(--jy-radius);
-  padding: 22px 24px;
-}
-
-.jycard .juya-masthead h1 {
-  color: inherit;
-}
-
-.jycard .juya-overview li::before {
-  content: "▪";
-  color: var(--jy-accent);
-}
-
 /* ---- 千禧网页式（Y2K） ---- */
 [data-juya-variant="y2k-light"] {
   --jy-bg: #dce6f5;
@@ -747,7 +688,6 @@
   .jynews .juya-entry-columns {
     column-count: 1;
   }
-  .jycard .juya-masthead,
   .jydream .juya-masthead,
   .jypop .juya-masthead {
     padding: 16px;

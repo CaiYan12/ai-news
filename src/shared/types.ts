@@ -40,7 +40,7 @@ export interface LayoutConfig {
 	};
 }
 
-/** 橘鸦定制阅读风格标识。'off' = 关闭（回退通用阅读页）。 */
+/** 橘鸦定制阅读风格标识。'off' 回退通用阅读页；'card' 仅保留为旧存储值供读取迁移。 */
 export type JuyaStyleId =
 	"off" | "card" | "folio" | "y2k" | "pop" | "newsprint90s" | "dreamcore";
 

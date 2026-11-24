@@ -102,6 +102,9 @@ function parseEntry(h3: Element): JuyaEntry {
 		if (tag === "BLOCKQUOTE" && entry.lead === null && !linksStarted) {
 			entry.lead = (node.textContent ?? "").trim() || null;
 		} else if (tag === "P") {
+			// Preserve the pre-existing structured recognition contract: image-bearing paragraphs
+			// contribute image blocks only; surrounding paragraph text remains intentionally excluded.
+			// `blocks` preserves the source order of the already-recognized paragraph/image units.
 			const images = [...node.querySelectorAll("img")].map((img) => ({
 				src: img.getAttribute("src") ?? "",
 				alt: img.getAttribute("alt") ?? "",
