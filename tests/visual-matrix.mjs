@@ -21,6 +21,7 @@ const currentStyles = ["folio", "y2k", "pop", "newsprint90s", "synthwave"];
 const historicalStyles = ["card", "y2k", "pop", "newsprint90s", "dreamcore"];
 const styles = historicalComparison ? historicalStyles : currentStyles;
 const versions = historicalComparison ? ["old", "pre-theme"] : ["current"];
+const caseFilter = process.env.AI_NEWS_CASE ? new Set(process.env.AI_NEWS_CASE.split(",").map(value => value.trim()).filter(Boolean)) : null;
 const output = resolve(process.env.AI_NEWS_EVIDENCE || "test-results/visual-matrix");
 await mkdir(output, { recursive: true });
 let activeVersion = "current";
@@ -45,7 +46,7 @@ try {
   for (const viewport of [{width:1280,height:900}, {width:390,height:844}]) {
     for (const style of styles) {
       for (const scheme of ["light", "dark"]) {
-        if (process.env.AI_NEWS_CASE && `${viewport.width}x${viewport.height}-${style}-${scheme}` !== process.env.AI_NEWS_CASE) continue;
+        if (caseFilter && !caseFilter.has(`${viewport.width}x${viewport.height}-${style}-${scheme}`)) continue;
         for (const version of versions) {
           activeVersion = version;
           const context = await browser.newContext({viewport, colorScheme:scheme, reducedMotion:"reduce"});
@@ -109,9 +110,41 @@ try {
               assert.ok(headingContrast.leadRatio >= 3, `Y2K light ${view} heading contrast against lead surface: ${JSON.stringify(headingContrast)}`);
             }
             if (style === "y2k" && scheme === "light") assert.equal(await page.locator('.juya-scene').count(), 0, `y2k-light keeps its static star texture in ${view}`);
+            if (style === "pop") {
+              if (view === "list") {
+                assert.equal(await page.locator(".jypop-feed-masthead h1").textContent(), "橘鸦AI早报", `pop ${scheme} feed masthead shows source identity`);
+                assert.ok(await page.locator(".jypop-feed-masthead-strip[aria-hidden='true']").count(), `pop ${scheme} feed masthead has decorative Ben-Day strip`);
+                assert.equal(await page.locator(".jypop-feed-masthead-domain").textContent(), "daily.juya.uk", `pop ${scheme} feed masthead shows source host`);
+              }
+            }
+            if (style === "newsprint90s") {
+              if (view === "list") {
+                assert.equal(await page.locator(".jynews-feed-masthead h1").textContent(), "橘鸦AI早报", `newsprint90s ${scheme} feed masthead shows source identity`);
+                assert.equal(await page.locator(".jynews-feed-masthead-domain").textContent(), "daily.juya.uk", `newsprint90s ${scheme} feed masthead shows source host`);
+              } else {
+                assert.ok(await page.locator(".juya-date-line").textContent(), `newsprint90s ${scheme} issue masthead shows published date`);
+                assert.ok(await page.locator(".juya-masthead-weekday").textContent(), `newsprint90s ${scheme} issue masthead shows published weekday`);
+                assert.ok(await page.locator(".juya-masthead-title").textContent(), `newsprint90s ${scheme} issue masthead shows issue title`);
+                const columns = await page.locator(".juya-entry-columns").first().evaluate(node => getComputedStyle(node).columnCount);
+                assert.equal(columns, viewport.width >= 900 ? "2" : "1", `newsprint90s ${scheme} ${viewport.width}px reading columns reflow`);
+              }
+            }
             if (viewport.width === 390) assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${style}-${scheme} has no horizontal page overflow in ${view}`);
             const id = `${viewport.width}x${viewport.height}-${style}-${scheme}-${view}-${version}`;
             await page.screenshot({path:resolve(output, `${id}.png`), fullPage:true, animations:"disabled"});
+            if (view === "list") {
+              const firstItem = page.locator(".juya-feed-item").first();
+              await firstItem.locator('[title="收藏"]').click();
+              assert.equal(await page.locator(".juya-feed-item").count(), 10, `${style}-${scheme} favorite action does not open the issue`);
+              assert.equal(await firstItem.locator('[title="取消收藏"]').count(), 1, `${style}-${scheme} favorite action updates in place`);
+              if (viewport.width === 390) await page.getByRole("button", { name: /筛选/ }).click();
+              await page.getByRole("button", { name: /稍后读/ }).click();
+              await page.locator(".juya-feed-empty").waitFor();
+              assert.match(await page.locator(".juya-feed-empty").innerText(), /暂无内容/);
+              assert.equal(await page.locator(".jypop-feed-masthead h1, .jynews-feed-masthead h1").count(), style === "pop" || style === "newsprint90s" ? 1 : 0, `${style}-${scheme} feed masthead remains visible with empty results`);
+              await page.locator("button").filter({ hasText: /^全部/ }).first().click();
+              await page.locator(".juya-feed-item").first().waitFor();
+            }
             const metrics = await page.evaluate(() => {
               const box = el => { const r=el.getBoundingClientRect(); const c=getComputedStyle(el); return {x:r.x,y:r.y,width:r.width,height:r.height,color:c.color,background:c.backgroundColor,font:c.fontFamily,fontSize:c.fontSize}; };
               return {title:document.title, bodyText:document.body.innerText, documentHeight:document.documentElement.scrollHeight, header:box(document.querySelector('header')), content:box(document.querySelector('[data-zoom-content]')), variant:document.querySelector('[data-juya-variant]')?.getAttribute('data-juya-variant'), refreshDisabled:document.querySelector('button[title="刷新"]')?.disabled};
@@ -124,7 +157,7 @@ try {
     }
   }
   await writeFile(resolve(output,"metrics.json"), JSON.stringify(results,null,2));
-  assert.equal(results.length, (process.env.AI_NEWS_CASE ? 2 : 40) * versions.length);
+  assert.equal(results.length, (caseFilter ? caseFilter.size * 2 : 40) * versions.length);
   assert.deepEqual(results.flatMap(r => r.errors.map(e => `${r.id}: ${e}`)), []);
   console.log(`PASS captured ${results.length} rendered views; evidence: ${output}`);
 } finally { await browser.close(); await new Promise(r => server.close(r)); }

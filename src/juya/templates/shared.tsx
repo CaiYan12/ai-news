@@ -1,5 +1,14 @@
 import type { JuyaEntry, JuyaOverviewEntry } from "../parseJuyaIssue";
 
+export function sourceHostname(sourceUrl: string): string {
+	if (!sourceUrl) return "";
+	try {
+		return new URL(sourceUrl).hostname;
+	} catch {
+		return "";
+	}
+}
+
 export function EntryTitle({
 	entry,
 	onOpenLink,
