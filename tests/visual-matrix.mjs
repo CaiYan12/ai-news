@@ -78,9 +78,35 @@ try {
             }
             const variant = await page.locator('[data-juya-variant]').first().getAttribute('data-juya-variant');
             assert.equal(variant, `${style}-${scheme}`);
+            let headingContrast = null;
             if (style === "synthwave" || (style === "y2k" && scheme === "dark")) {
               assert.equal(await page.locator('.juya-scene').count(), 1, `${style}-${scheme} scene in ${view}`);
               assert.equal(await page.locator('.juya-scene-sun, .juya-scene-stars').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).animationName === "none")), true, `${style}-${scheme} honors reduced motion`);
+            }
+            if (style === "y2k" && scheme === "light") {
+              headingContrast = await page.evaluate((view) => {
+                const heading = document.querySelector(view === "list" ? ".jyy2k-feed-masthead h1" : ".juya-masthead h1");
+                if (!heading) throw new Error(`Missing Y2K ${view} masthead heading`);
+                const root = heading.closest("[data-juya-variant]");
+                if (!root) throw new Error("Missing Y2K variant root");
+                const rgb = (color) => {
+                  const hex = color.match(/^#([\da-f]{3}|[\da-f]{6})$/i)?.[1];
+                  const values = hex
+                    ? (hex.length === 3 ? [...hex].map((channel) => Number.parseInt(channel + channel, 16)) : hex.match(/.{2}/g).map((channel) => Number.parseInt(channel, 16)))
+                    : color.match(/^rgba?\(([^)]+)\)$/i)?.[1].split(/[\s,/]+/).filter(Boolean).slice(0, 3).map(Number);
+                  if (!values || values.length < 3) throw new Error(`Unparseable color: ${color}`);
+                  return values.map((value) => value / 255 <= .04045 ? value / 255 / 12.92 : ((value / 255 + .055) / 1.055) ** 2.4);
+                };
+                const luminance = (color) => { const [r, g, b] = rgb(color); return .2126 * r + .7152 * g + .0722 * b; };
+                const ratio = (foreground, background) => { const [a, b] = [luminance(foreground), luminance(background)].sort((x, y) => y - x); return (a + .05) / (b + .05); };
+                const headingStyle = getComputedStyle(heading), tokens = getComputedStyle(root);
+                const foreground = headingStyle.color;
+                const backgrounds = [tokens.getPropertyValue("--jy-card").trim(), tokens.getPropertyValue("--jy-lead-bg").trim()];
+                return { foreground, backgroundImage: headingStyle.backgroundImage, cardRatio: ratio(foreground, backgrounds[0]), leadRatio: ratio(foreground, backgrounds[1]) };
+              }, view);
+              assert.equal(headingContrast.backgroundImage, "none", `Y2K light ${view} masthead uses solid accessible text`);
+              assert.ok(headingContrast.cardRatio >= 3, `Y2K light ${view} heading contrast against card: ${JSON.stringify(headingContrast)}`);
+              assert.ok(headingContrast.leadRatio >= 3, `Y2K light ${view} heading contrast against lead surface: ${JSON.stringify(headingContrast)}`);
             }
             if (style === "y2k" && scheme === "light") assert.equal(await page.locator('.juya-scene').count(), 0, `y2k-light keeps its static star texture in ${view}`);
             if (viewport.width === 390) assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${style}-${scheme} has no horizontal page overflow in ${view}`);
@@ -90,7 +116,7 @@ try {
               const box = el => { const r=el.getBoundingClientRect(); const c=getComputedStyle(el); return {x:r.x,y:r.y,width:r.width,height:r.height,color:c.color,background:c.backgroundColor,font:c.fontFamily,fontSize:c.fontSize}; };
               return {title:document.title, bodyText:document.body.innerText, documentHeight:document.documentElement.scrollHeight, header:box(document.querySelector('header')), content:box(document.querySelector('[data-zoom-content]')), variant:document.querySelector('[data-juya-variant]')?.getAttribute('data-juya-variant'), refreshDisabled:document.querySelector('button[title="刷新"]')?.disabled};
             });
-            results.push({id, metrics, errors:[...errors], imageUrls:[...imageUrls]});
+            results.push({id, metrics, headingContrast, errors:[...errors], imageUrls:[...imageUrls]});
           }
           await context.close();
         }
