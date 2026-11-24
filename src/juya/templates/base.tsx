@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { Article } from "../../shared/types";
 import type {
 	JuyaTemplate,
@@ -20,10 +20,12 @@ interface TemplateOptions {
 	entryColumns?: boolean;
 	/** 报头附加行（如报刊日期线），入参为文章发布日期 */
 	mastheadExtra?: (pubDate: string) => JSX.Element | null;
+	/** 订阅源身份区；在共享列表前呈现，仅由需要该区块的风格启用。 */
+	feedScene?: (source: { name: string; url: string }) => ReactNode;
 }
 
 export function makeJuyaTemplate(opts: TemplateOptions): JuyaTemplate {
-	const { variantClass, entryColumns = false, mastheadExtra } = opts;
+	const { variantClass, entryColumns = false, mastheadExtra, feedScene } = opts;
 
 	function IssueView({
 		article,
@@ -197,6 +199,7 @@ export function makeJuyaTemplate(opts: TemplateOptions): JuyaTemplate {
 				暂无内容，点击右上角的刷新重试
 			</div>
 		);
+		const scene = feedScene?.({ name: source.name, url: source.url });
 
 		if (preset === "magazine") {
 			return (
@@ -204,6 +207,7 @@ export function makeJuyaTemplate(opts: TemplateOptions): JuyaTemplate {
 					className={`juya-root ${variantClass}`}
 					data-juya-variant={variantId}
 				>
+					{scene}
 					<div className="juya-feed">
 						{empty && emptyNode}
 						{articles[0] && renderItem(articles[0], 0, "featured")}
@@ -226,6 +230,7 @@ export function makeJuyaTemplate(opts: TemplateOptions): JuyaTemplate {
 					className={`juya-root ${variantClass}`}
 					data-juya-variant={variantId}
 				>
+					{scene}
 					<div className="juya-feed juya-feed-compact">
 						{empty
 							? emptyNode
@@ -241,6 +246,7 @@ export function makeJuyaTemplate(opts: TemplateOptions): JuyaTemplate {
 				className={`juya-root ${variantClass}`}
 				data-juya-variant={variantId}
 			>
+				{scene}
 				<div className="juya-feed juya-feed-grid" style={gridProps}>
 					{empty
 						? emptyNode

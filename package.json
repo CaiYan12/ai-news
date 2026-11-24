@@ -13,7 +13,8 @@
     "test:feed": "node tests/feed.mjs",
     "test:experience": "node tests/experience.mjs",
     "test:motion": "node tests/navigation-motion.mjs",
-    "test:visual": "node tests/visual-matrix.mjs"
+    "test:visual": "node tests/visual-matrix.mjs",
+    "test:juya-folio": "node tests/juya-folio.mjs"
   },
   "dependencies": {
     "dompurify": "3.4.16",

@@ -30,10 +30,17 @@ export function loadPersisted(): PersistedState | null {
 	try {
 		const parsed = JSON.parse(raw) as Partial<PersistedState>;
 		if (!parsed || typeof parsed !== "object") return null;
+		const storedSettings = {
+			...DEFAULT_SETTINGS,
+			...(parsed.settings ?? {}),
+		};
+		// The former card preference now selects the folio design on the same color side.
+		if (storedSettings.juyaLightStyleId === "card") storedSettings.juyaLightStyleId = "folio";
+		if (storedSettings.juyaDarkStyleId === "card") storedSettings.juyaDarkStyleId = "folio";
 		return {
 			version: 1,
 			// 逐字段收敛，避免旧版本缺字段导致下游 undefined
-			settings: { ...DEFAULT_SETTINGS, ...(parsed.settings ?? {}) },
+			settings: storedSettings,
 			articles: Array.isArray(parsed.articles) ? parsed.articles : [],
 			history:
 				parsed.history && typeof parsed.history === "object"

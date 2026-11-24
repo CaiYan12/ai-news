@@ -42,7 +42,7 @@ export interface LayoutConfig {
 
 /** 橘鸦定制阅读风格标识。'off' = 关闭（回退通用阅读页）。 */
 export type JuyaStyleId =
-	"off" | "card" | "y2k" | "pop" | "newsprint90s" | "dreamcore";
+	"off" | "card" | "folio" | "y2k" | "pop" | "newsprint90s" | "dreamcore";
 
 /** 列表筛选维度 */
 export type FilterKind = "all" | "unread" | "favorite" | "readLater";
@@ -108,6 +108,6 @@ export const DEFAULT_SETTINGS: Settings = {
 	refreshIntervalMin: 30,
 	historyRetentionDays: 30,
 	uiZoom: 1,
-	juyaLightStyleId: "card",
-	juyaDarkStyleId: "card",
+	juyaLightStyleId: "folio",
+	juyaDarkStyleId: "folio",
 };

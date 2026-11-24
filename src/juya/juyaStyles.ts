@@ -1,11 +1,13 @@
 import type { JuyaStyleId } from "../shared/types";
 
 /** 橘鸦定制阅读风格注册表（内置、只读，不进主题体系）。
- *  五种风格 × 亮暗双变体 = 10 个条目；用户仅能选择，不可编辑。 */
+ *  五种可选风格 × 亮暗双变体；card 元数据仅用于识别旧设置。 */
 
 export type JuyaStyleVariantId =
 	| "card-light"
 	| "card-dark"
+	| "folio-light"
+	| "folio-dark"
 	| "y2k-light"
 	| "y2k-dark"
 	| "pop-light"
@@ -44,6 +46,22 @@ export const JUYA_STYLES: JuyaStyleMeta[] = [
 		name: "卡片主题式",
 		colorScheme: "dark",
 		focusColor: "#f0a080",
+		background: "css-svg",
+	},
+	{
+		id: "folio-light",
+		styleId: "folio",
+		name: "纸感精读式",
+		colorScheme: "light",
+		focusColor: "#b3452e",
+		background: "css-svg",
+	},
+	{
+		id: "folio-dark",
+		styleId: "folio",
+		name: "纸感精读式",
+		colorScheme: "dark",
+		focusColor: "#e0956f",
 		background: "css-svg",
 	},
 	{
@@ -114,5 +132,5 @@ export const JUYA_STYLES: JuyaStyleMeta[] = [
 
 /** 按亮暗隔离规则取某侧可选风格（亮侧只列 light 变体，暗侧只列 dark 变体）。 */
 export function juyaStylesForScheme(scheme: "light" | "dark"): JuyaStyleMeta[] {
-	return JUYA_STYLES.filter((s) => s.colorScheme === scheme);
+	return JUYA_STYLES.filter((s) => s.colorScheme === scheme && s.styleId !== "card");
 }

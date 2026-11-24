@@ -7,3 +7,5 @@
 - 运行依赖按各自许可分发：DOMPurify 3.4.16 为 MPL-2.0 或 Apache-2.0，lucide-react 1.38.0 为 ISC，React / React DOM 19.2.8 和 Zustand 5.0.15 为 MIT。版本与完整依赖树以 `pnpm-lock.yaml` 为准；各包的许可文件随包提供。开发工具也有各自许可，例如 Playwright 和 TypeScript 为 Apache-2.0。
 
 快照不是完整离线包：页面和资源仍须加载，快照中图片可能来自外部。实时源能否被浏览器读取取决于上游响应和 CORS；见 [取数说明](docs/feed-behavior.md)。
+
+- 橘鸦定制风格的纸感精读式（folio）网页变体与订阅页头版参考 `D:\Dev\opia-rss-reader` 提交 `3db178c2a438ef607aff8e1ccc5e6e82124f167c`。来源所有者授权复用其 CSS 与模板视觉设计；AI 日报网页实现按本项目的数据与操作接口适配，来源代码与内容仍按其各自权利处理。

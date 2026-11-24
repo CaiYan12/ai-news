@@ -28,7 +28,7 @@ const browser = await chromium.launch();
 const results = [];
 try {
   for (const viewport of [{width:1280,height:900}, {width:390,height:844}]) {
-    for (const style of ["card", "y2k", "pop", "newsprint90s", "dreamcore"]) {
+    for (const style of ["card", "folio", "y2k", "pop", "newsprint90s", "dreamcore"]) {
       for (const scheme of ["light", "dark"]) {
         if (process.env.AI_NEWS_CASE && `${viewport.width}x${viewport.height}-${style}-${scheme}` !== process.env.AI_NEWS_CASE) continue;
         for (const version of oldRoot ? ["old", "new"] : ["new"]) {
@@ -62,7 +62,7 @@ try {
               await page.locator('[data-zoom-content] [data-juya-variant]').first().waitFor();
             }
             const variant = await page.locator('[data-juya-variant]').first().getAttribute('data-juya-variant');
-            assert.equal(variant, `${style}-${scheme}`);
+            assert.equal(variant, `${style === "card" ? "folio" : style}-${scheme}`);
             const id = `${viewport.width}x${viewport.height}-${style}-${scheme}-${view}-${version}`;
             await page.screenshot({path:resolve(output, `${id}.png`), fullPage:true, animations:"disabled"});
             const metrics = await page.evaluate(() => {
@@ -77,7 +77,7 @@ try {
     }
   }
   await writeFile(resolve(output,"metrics.json"), JSON.stringify(results,null,2));
-  assert.equal(results.length, (process.env.AI_NEWS_CASE ? 2 : 40) * (oldRoot ? 2 : 1));
+  assert.equal(results.length, (process.env.AI_NEWS_CASE ? 2 : 48) * (oldRoot ? 2 : 1));
   assert.deepEqual(results.flatMap(r => r.errors.map(e => `${r.id}: ${e}`)), []);
   console.log(`PASS captured ${results.length} rendered views; evidence: ${output}`);
 } finally { await browser.close(); await new Promise(r => server.close(r)); }
