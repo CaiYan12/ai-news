@@ -589,95 +589,88 @@
   }
 }
 
-/* ---- 蒸汽梦核式 ---- */
-[data-juya-variant="dreamcore-light"] {
-  --jy-bg: #efe6fb;
-  background-image: linear-gradient(160deg, #f6e9ff 0%, #e6ecff 45%, #ffe9f4 100%);
-  --jy-card: rgba(255, 255, 255, 0.72);
-  --jy-border: rgba(124, 77, 255, 0.35);
-  --jy-heading: #3a2b63;
-  --jy-text: #4a4066;
-  --jy-muted: #8578a8;
-  --jy-accent: #7c4dff;
-  --jy-on-accent: #ffffff;
-  --jy-link: #5e35d1;
-  --jy-lead-bg: rgba(124, 77, 255, 0.08);
+/* ---- 蒸汽梦核式（Synthwave） ---- */
+[data-juya-variant="synthwave-light"] {
+  --jy-bg: #ffe6cc;
+  --jy-card: rgba(255, 255, 255, .78);
+  --jy-border: rgba(224, 0, 110, .38);
+  --jy-heading: #4a0736;
+  --jy-text: #3d0a2c;
+  --jy-muted: #743657;
+  --jy-accent: #e0006e;
+  --jy-on-accent: #fff;
+  --jy-link: #a90058;
+  --jy-lead-bg: rgba(224, 0, 110, .10);
   --jy-focus: #7c4dff;
   --jy-radius: 16px;
+  --jy-scene-grid-line: rgba(255, 45, 149, .42);
+  --jy-scene-sun: #ffb03a;
+  background-color: var(--jy-bg);
 }
 
-[data-juya-variant="dreamcore-dark"] {
-  --jy-bg: #0d0a1a;
-  background-image:
-    radial-gradient(600px 300px at 15% 0%, rgba(124, 77, 255, 0.28), transparent 65%), radial-gradient(500px 280px at 90% 30%, rgba(255, 64, 160, 0.16), transparent 60%),
-    linear-gradient(180deg, #120d26 0%, #0d0a1a 100%);
-  --jy-card: rgba(26, 20, 48, 0.82);
-  --jy-border: rgba(179, 136, 255, 0.35);
-  --jy-heading: #e8ddff;
-  --jy-text: #bcb2d8;
-  --jy-muted: #7d71a0;
-  --jy-accent: #9c6bff;
-  --jy-on-accent: #120d26;
-  --jy-link: #c9a8ff;
-  --jy-lead-bg: rgba(156, 107, 255, 0.12);
-  --jy-focus: #b388ff;
+[data-juya-variant="synthwave-dark"] {
+  --jy-bg: #0b0918;
+  --jy-card: rgba(20, 8, 38, .78);
+  --jy-border: rgba(255, 45, 149, .42);
+  --jy-heading: #ffe6ff;
+  --jy-text: #f0dcff;
+  --jy-muted: #c9b7e0;
+  --jy-accent: #ff2d95;
+  --jy-on-accent: #1a0010;
+  --jy-link: #ff8ad0;
+  --jy-lead-bg: rgba(255, 45, 149, .12);
+  --jy-focus: #b89aff;
   --jy-radius: 16px;
+  --jy-scene-grid-line: rgba(255, 45, 149, .5);
+  --jy-scene-sun: #ff9a3c;
+  background-color: var(--jy-bg);
 }
 
-/* 发光边框 + 毛玻璃卡片；背景氛围漂移（每屏唯一动效，可关闭：reduced-motion 下静态） */
-.jydream .juya-entry,
-.jydream .juya-masthead {
-  background: var(--jy-card);
-  border: 1px solid var(--jy-border);
-  border-radius: var(--jy-radius);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 0 18px rgba(124, 77, 255, 0.18);
-}
+.jysynth .juya-scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: linear-gradient(180deg, #ffd6e8 0%, #ffc4d8 44%, #ffb27a 82%, #ffe6cc 100%); }
+[data-juya-variant="synthwave-dark"].jysynth .juya-scene { background: repeating-linear-gradient(180deg, rgba(0,0,0,.08) 0 1px, transparent 1px 4px), linear-gradient(180deg,#24103f 0%,#3d0f4a 32%,#b01a5a 68%,#ff8a4c 88%,#1a0b2e 100%); }
+.jysynth .juya-scene-sun { position: absolute; top: 7%; left: 50%; width: min(52vh, 420px); aspect-ratio: 1; translate: -50% 0; border-radius: 50%; background: linear-gradient(180deg,#fff04d 0%,#ff9a3c 55%,#ff2d95 100%); -webkit-mask-image: repeating-linear-gradient(180deg,#000 0 38px,transparent 38px 46px); mask-image: repeating-linear-gradient(180deg,#000 0 38px,transparent 38px 46px); opacity: .88; }
+.jysynth .juya-scene-grid-perspective { position: absolute; left: -25%; right: -25%; bottom: 0; height: 46vh; transform: perspective(900px) rotateX(62deg); transform-origin: bottom center; background-image: repeating-linear-gradient(90deg,var(--jy-scene-grid-line) 0 1px,transparent 1px 56px),repeating-linear-gradient(0deg,var(--jy-scene-grid-line) 0 1px,transparent 1px 44px); -webkit-mask-image: linear-gradient(180deg,transparent,#000 45%); mask-image: linear-gradient(180deg,transparent,#000 45%); }
+.jysynth .juya-issue, .jysynth .juya-feed { position: relative; z-index: 1; }
+.jysynth .juya-masthead, .jysynth .juya-entry, .jysynth .juya-feed-item { background: var(--jy-card); border: 1px solid var(--jy-border); border-radius: var(--jy-radius); backdrop-filter: blur(8px); box-shadow: 0 0 20px rgba(255,45,149,.16); }
+.jysynth .juya-masthead, .jysynth .juya-entry { padding: 20px 22px; }
+.jysynth .juya-masthead h1 { color: var(--jy-heading); }
+.jysynth .juya-entry > h3 { color: var(--jy-heading); }
+.jysynth .juya-media-hero { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.jysynth .juya-media-hero img:first-child { grid-column: 1 / -1; width: 100%; aspect-ratio: 21 / 9; object-fit: cover; }
+.jysynth-feed-masthead { position: relative; z-index: 1; width: min(1120px,100%); margin: 18px auto 0; padding: 24px 28px; }
+.jysynth-feed-kicker { color: var(--jy-accent); font-size: 12px; letter-spacing: .22em; text-transform: uppercase; }
+.jysynth-feed-masthead h1 { color: var(--jy-heading); font-size: clamp(38px,6vw,68px); line-height: 1.1; overflow-wrap: anywhere; text-shadow: 0 0 18px rgba(255,45,149,.35); }
+.jysynth-feed-domain { color: var(--jy-muted); font-family: Consolas,monospace; font-size: 12px; margin-top: 8px; }
 
-.jydream .juya-entry {
-  padding: 18px 20px;
-}
-
-.jydream .juya-masthead {
-  padding: 24px;
-}
-
-.jydream .juya-masthead h1 {
-  background: linear-gradient(90deg, var(--jy-heading), var(--jy-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.jydream .juya-lead {
-  border-left: 3px solid var(--jy-accent);
-  border-radius: 8px;
-}
-
-.jydream .juya-feed-item {
-  background: var(--jy-card);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 0 14px rgba(124, 77, 255, 0.16);
-}
-
-@keyframes jy-dream-drift {
-  from {
-    background-position: 0% 0%;
-  }
-  to {
-    background-position: 120% 60%;
-  }
-}
-
-[data-juya-variant="dreamcore-dark"].juya-root {
-  animation: jy-dream-drift 40s linear infinite alternate;
-  background-size: 160% 160%;
-}
+/* 千禧网页式：窗口化刊头、信笺排版与暗侧星野/地平网格。 */
+.jyy2k .juya-entry-split { background: var(--jy-card); border: 2px solid var(--jy-border); padding: 16px 18px; }
+.jyy2k .juya-entry-row { display: flex; align-items: flex-start; gap: 20px; }
+.jyy2k .juya-entry-body { flex: 1; min-width: 0; }
+.jyy2k .juya-entry-figure { width: min(34%,240px); flex: none; }
+.jyy2k .juya-entry-figure img { border: 2px solid var(--jy-border); box-shadow: 2px 2px 0 rgba(0,0,0,.18); }
+.jyy2k .juya-entry-alt .juya-entry-row { flex-direction: row-reverse; }
+.jyy2k .juya-entry p:not(.juya-links-label) { text-indent: 2em; }
+.jyy2k .juya-masthead { position: relative; padding: 32px 18px 18px; background: linear-gradient(180deg,var(--jy-card),var(--jy-lead-bg)); border: 2px solid var(--jy-border); box-shadow: inset 1px 1px 0 rgba(255,255,255,.6),2px 2px 0 rgba(0,0,0,.18); }
+.jyy2k .juya-masthead::before { content: '◆ AI_DAILY.EXE — 运行中'; position: absolute; top: 6px; left: 9px; color: var(--jy-muted); font: 10px 'Courier New',monospace; }
+.jyy2k .juya-masthead::after { content: '×'; position: absolute; top: 3px; right: 6px; width: 18px; text-align: center; color: var(--jy-on-accent); background: var(--jy-accent); }
+.jyy2k .juya-masthead h1 { background: linear-gradient(180deg,#fff,#b9c8e8 55%,#6b82b8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.jyy2k .juya-section > h2 { border-bottom: 2px dotted var(--jy-border); padding-bottom: 6px; }
+.jyy2k .juya-feed-item { border: 2px solid var(--jy-border); box-shadow: inset 1px 1px 0 rgba(255,255,255,.55),2px 2px 0 rgba(0,0,0,.18); }
+.jyy2k-feed-masthead { position: relative; width: min(1120px,100%); margin: 16px auto 0; padding: 38px 26px 24px; border: 2px solid var(--jy-border); background: linear-gradient(180deg,var(--jy-card),var(--jy-lead-bg)); box-shadow: 2px 2px 0 rgba(0,0,0,.18); }
+.jyy2k-feed-titlebar { position: absolute; inset: 4px 7px auto; display: flex; justify-content: space-between; gap: 8px; color: var(--jy-muted); font: 10px 'Courier New',monospace; }
+.jyy2k-feed-titlebar span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jyy2k-feed-kicker { color: var(--jy-accent); font-size: 12px; letter-spacing: .2em; }
+.jyy2k-feed-masthead h1 { margin-top: 8px; font-size: clamp(38px,6vw,68px); line-height: 1.12; overflow-wrap: anywhere; background: linear-gradient(180deg,#fff,#b9c8e8 55%,#6b82b8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.jyy2k-feed-domain { color: var(--jy-muted); font: 12px 'Courier New',monospace; margin-top: 10px; }
+.jyy2k .juya-scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.jyy2k .juya-scene-stars { position: absolute; inset: 0; background-image: radial-gradient(1.4px 1.4px at 22% 18%,#dfe9ff 50%,transparent 51%),radial-gradient(1px 1px at 68% 32%,#dfe9ff 50%,transparent 51%),radial-gradient(1.8px 1.8px at 44% 64%,#dfe9ff 50%,transparent 51%); background-size: 260px 260px,180px 180px,340px 340px; animation: jy-y2k-twinkle 5s ease-in-out infinite alternate; }
+.jyy2k .juya-scene-grid-horizon { position: absolute; left: -20%; right: -20%; bottom: 0; height: 30vh; transform: perspective(300px) rotateX(60deg); transform-origin: bottom center; background-image: repeating-linear-gradient(90deg,rgba(91,157,255,.35) 0 1px,transparent 1px 56px),repeating-linear-gradient(0deg,rgba(91,157,255,.35) 0 1px,transparent 1px 44px); -webkit-mask-image: linear-gradient(180deg,transparent,#000 46%); mask-image: linear-gradient(180deg,transparent,#000 46%); }
+[data-juya-variant="y2k-light"].jyy2k .juya-scene { display: none; }
+.jyy2k .juya-issue, .jyy2k .juya-feed { position: relative; z-index: 1; }
+@keyframes jy-y2k-twinkle { from { opacity: .55; } to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-juya-variant="dreamcore-dark"].juya-root {
-    animation: none;
-  }
+  .jysynth .juya-scene-sun, .jyy2k .juya-scene-stars { animation: none; }
 }
 
 /* 窄窗口（≤480px 内容区）：收紧边距，取消分栏 */
@@ -688,8 +681,11 @@
   .jynews .juya-entry-columns {
     column-count: 1;
   }
-  .jydream .juya-masthead,
+  .jysynth .juya-masthead,
   .jypop .juya-masthead {
     padding: 16px;
   }
+  .jyy2k .juya-entry-row, .jyy2k .juya-entry-alt .juya-entry-row { flex-direction: column; }
+  .jyy2k .juya-entry-figure { width: 100%; }
+  .jysynth .juya-media-hero { grid-template-columns: 1fr; }
 }

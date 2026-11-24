@@ -34,9 +34,14 @@ export function loadPersisted(): PersistedState | null {
 			...DEFAULT_SETTINGS,
 			...(parsed.settings ?? {}),
 		};
-		// The former card preference now selects the folio design on the same color side.
+		const legacyStyleSettings = parsed.settings as
+			| Partial<Record<"juyaLightStyleId" | "juyaDarkStyleId", string>>
+			| undefined;
+		// Legacy card and dreamcore selections migrate in place on their existing color sides.
 		if (storedSettings.juyaLightStyleId === "card") storedSettings.juyaLightStyleId = "folio";
 		if (storedSettings.juyaDarkStyleId === "card") storedSettings.juyaDarkStyleId = "folio";
+		if (legacyStyleSettings?.juyaLightStyleId === "dreamcore") storedSettings.juyaLightStyleId = "synthwave";
+		if (legacyStyleSettings?.juyaDarkStyleId === "dreamcore") storedSettings.juyaDarkStyleId = "synthwave";
 		return {
 			version: 1,
 			// 逐字段收敛，避免旧版本缺字段导致下游 undefined

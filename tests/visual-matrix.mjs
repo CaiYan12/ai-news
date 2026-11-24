@@ -17,7 +17,7 @@ if (historicalComparison && oldRoot === preThemeRoot) {
   throw new Error("AI_NEWS_OLD_DIST and AI_NEWS_PRE_THEME_DIST must point to different dist roots.");
 }
 const currentRoot = resolve("dist");
-const currentStyles = ["folio", "y2k", "pop", "newsprint90s", "dreamcore"];
+const currentStyles = ["folio", "y2k", "pop", "newsprint90s", "synthwave"];
 const historicalStyles = ["card", "y2k", "pop", "newsprint90s", "dreamcore"];
 const styles = historicalComparison ? historicalStyles : currentStyles;
 const versions = historicalComparison ? ["old", "pre-theme"] : ["current"];
@@ -78,6 +78,12 @@ try {
             }
             const variant = await page.locator('[data-juya-variant]').first().getAttribute('data-juya-variant');
             assert.equal(variant, `${style}-${scheme}`);
+            if (style === "synthwave" || (style === "y2k" && scheme === "dark")) {
+              assert.equal(await page.locator('.juya-scene').count(), 1, `${style}-${scheme} scene in ${view}`);
+              assert.equal(await page.locator('.juya-scene-sun, .juya-scene-stars').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).animationName === "none")), true, `${style}-${scheme} honors reduced motion`);
+            }
+            if (style === "y2k" && scheme === "light") assert.equal(await page.locator('.juya-scene').count(), 0, `y2k-light keeps its static star texture in ${view}`);
+            if (viewport.width === 390) assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${style}-${scheme} has no horizontal page overflow in ${view}`);
             const id = `${viewport.width}x${viewport.height}-${style}-${scheme}-${view}-${version}`;
             await page.screenshot({path:resolve(output, `${id}.png`), fullPage:true, animations:"disabled"});
             const metrics = await page.evaluate(() => {
