@@ -17,9 +17,10 @@ if (historicalComparison && oldRoot === preThemeRoot) {
   throw new Error("AI_NEWS_OLD_DIST and AI_NEWS_PRE_THEME_DIST must point to different dist roots.");
 }
 const currentRoot = resolve("dist");
-const currentStyles = ["folio", "y2k", "pop", "newsprint90s", "synthwave"];
+const currentStyles = ["folio", "y2k", "pop", "newsprint90s", "synthwave", "nocturne", "editorial", "wabi"];
 const historicalStyles = ["card", "y2k", "pop", "newsprint90s", "dreamcore"];
 const styles = historicalComparison ? historicalStyles : currentStyles;
+const currentVariantIds = ["folio-light", "folio-dark", "y2k-light", "y2k-dark", "pop-light", "pop-dark", "newsprint90s-light", "newsprint90s-dark", "synthwave-light", "synthwave-dark", "nocturne-light", "nocturne-dark", "editorial-light", "editorial-dark", "wabi-light", "wabi-dark"];
 const versions = historicalComparison ? ["old", "pre-theme"] : ["current"];
 const caseFilter = process.env.AI_NEWS_CASE ? new Set(process.env.AI_NEWS_CASE.split(",").map(value => value.trim()).filter(Boolean)) : null;
 const output = resolve(process.env.AI_NEWS_EVIDENCE || "test-results/visual-matrix");
@@ -79,6 +80,21 @@ try {
             }
             const variant = await page.locator('[data-juya-variant]').first().getAttribute('data-juya-variant');
             assert.equal(variant, `${style}-${scheme}`);
+            if (!historicalComparison) assert.ok(currentVariantIds.includes(variant), `current mode covers a registered variant: ${variant}`);
+            if (!historicalComparison && view === "list") {
+              assert.ok(await page.locator(".juya-feed").isVisible(), `${style}-${scheme} list has a visible feed anchor`);
+              assert.ok(await page.locator(".juya-feed-item").first().isVisible(), `${style}-${scheme} list has a visible issue anchor`);
+              assert.ok((await page.locator(".juya-feed-item").first().innerText()).trim().length > 0, `${style}-${scheme} list issue anchor has content`);
+            } else if (!historicalComparison) {
+              assert.ok(await page.locator(".juya-issue").isVisible(), `${style}-${scheme} detail has a visible issue anchor`);
+              assert.ok((await page.locator(".juya-masthead h1").first().innerText()).trim().length > 0, `${style}-${scheme} detail masthead has a title`);
+              assert.ok(await page.locator(".juya-overview a[href^='https://']").count() > 0, `${style}-${scheme} detail preserves an outbound overview link`);
+            }
+            const imageState = await page.locator("[data-juya-variant] img").evaluateAll(images => images.map(img => ({src:img.currentSrc || img.src, complete:img.complete, naturalWidth:img.naturalWidth, naturalHeight:img.naturalHeight})));
+            if (!historicalComparison) {
+              assert.ok(imageState.length > 0, `${style}-${scheme} ${view} renders image anchors`);
+              assert.ok(imageState.some(image => image.complete && image.naturalWidth > 0 && image.naturalHeight > 0), `${style}-${scheme} ${view} decodes at least one image: ${JSON.stringify(imageState)}`);
+            }
             let headingContrast = null;
             if (style === "synthwave" || (style === "y2k" && scheme === "dark")) {
               assert.equal(await page.locator('.juya-scene').count(), 1, `${style}-${scheme} scene in ${view}`);
@@ -110,6 +126,22 @@ try {
               assert.ok(headingContrast.leadRatio >= 3, `Y2K light ${view} heading contrast against lead surface: ${JSON.stringify(headingContrast)}`);
             }
             if (style === "y2k" && scheme === "light") assert.equal(await page.locator('.juya-scene').count(), 0, `y2k-light keeps its static star texture in ${view}`);
+            if (style === "nocturne" && scheme === "light") {
+              const mist = await page.locator(".juya-scene-dust").evaluate(node => {
+                const pseudo = getComputedStyle(node, "::after");
+                return {animationName:pseudo.animationName, animationDuration:pseudo.animationDuration, reducedMotion:matchMedia("(prefers-reduced-motion: reduce)").matches};
+              });
+              assert.equal(mist.reducedMotion, true, "nocturne-light is inspected under reduced motion");
+              assert.equal(mist.animationName, "none", `nocturne-light mist ::after honors reduced motion in ${view}: ${JSON.stringify(mist)}`);
+            }
+            if (style === "nocturne" && scheme === "dark") {
+              const sceneMotion = await page.locator(".juya-scene-stars").evaluate(node => ({stars:getComputedStyle(node).animationName, starsAfter:getComputedStyle(node, "::after").animationName, dust:getComputedStyle(node.parentElement.querySelector(".juya-scene-dust")).animationName}));
+              assert.deepEqual(sceneMotion, {stars:"none", starsAfter:"none", dust:"none"}, `nocturne-dark scene decoration honors reduced motion in ${view}: ${JSON.stringify(sceneMotion)}`);
+              if (view === "detail") {
+                const aurora = await page.locator(".juya-masthead").evaluate(node => ["::before", "::after"].map(pseudo => ({pseudo, animationName:getComputedStyle(node, pseudo).animationName})));
+                assert.ok(aurora.every(layer => layer.animationName === "none"), `nocturne-dark reading masthead layers honor reduced motion: ${JSON.stringify(aurora)}`);
+              }
+            }
             if (style === "pop") {
               if (view === "list") {
                 assert.equal(await page.locator(".jypop-feed-masthead h1").textContent(), "橘鸦AI早报", `pop ${scheme} feed masthead shows source identity`);
@@ -147,7 +179,8 @@ try {
             }
             const metrics = await page.evaluate(() => {
               const box = el => { const r=el.getBoundingClientRect(); const c=getComputedStyle(el); return {x:r.x,y:r.y,width:r.width,height:r.height,color:c.color,background:c.backgroundColor,font:c.fontFamily,fontSize:c.fontSize}; };
-              return {title:document.title, bodyText:document.body.innerText, documentHeight:document.documentElement.scrollHeight, header:box(document.querySelector('header')), content:box(document.querySelector('[data-zoom-content]')), variant:document.querySelector('[data-juya-variant]')?.getAttribute('data-juya-variant'), refreshDisabled:document.querySelector('button[title="刷新"]')?.disabled};
+              const images = [...document.querySelectorAll('[data-juya-variant] img')].map(img => ({src:img.currentSrc || img.src, complete:img.complete, naturalWidth:img.naturalWidth, naturalHeight:img.naturalHeight}));
+              return {title:document.title, bodyText:document.body.innerText, documentHeight:document.documentElement.scrollHeight, horizontalOverflow:document.documentElement.scrollWidth > window.innerWidth, anchors:document.querySelectorAll('[data-juya-variant] a[href]').length, images, header:box(document.querySelector('header')), content:box(document.querySelector('[data-zoom-content]')), variant:document.querySelector('[data-juya-variant]')?.getAttribute('data-juya-variant'), refreshDisabled:document.querySelector('button[title="刷新"]')?.disabled};
             });
             results.push({id, metrics, headingContrast, errors:[...errors], imageUrls:[...imageUrls]});
           }
@@ -157,7 +190,7 @@ try {
     }
   }
   await writeFile(resolve(output,"metrics.json"), JSON.stringify(results,null,2));
-  assert.equal(results.length, (caseFilter ? caseFilter.size * 2 : 40) * versions.length);
+  assert.equal(results.length, (caseFilter ? caseFilter.size * 2 : (historicalComparison ? 40 : 64)) * versions.length);
   assert.deepEqual(results.flatMap(r => r.errors.map(e => `${r.id}: ${e}`)), []);
   console.log(`PASS captured ${results.length} rendered views; evidence: ${output}`);
 } finally { await browser.close(); await new Promise(r => server.close(r)); }
