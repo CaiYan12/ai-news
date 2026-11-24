@@ -27,7 +27,10 @@ function EditorialEntry({
 }): JSX.Element {
 	const [openingLayout, setOpeningLayout] = useState<"landscape" | "stacked">("stacked");
 	const blocks = entryBlocks(entry);
-	const openingImage = sectionOpening ? blocks.find((block) => block.kind === "image") : undefined;
+	const openingImageIndex = sectionOpening
+		? blocks.findIndex((block) => block.kind === "image")
+		: -1;
+	const openingImage = openingImageIndex >= 0 ? blocks[openingImageIndex] : undefined;
 	return (
 		<article className="juya-entry">
 			{sectionOpening ? (
@@ -35,6 +38,10 @@ function EditorialEntry({
 					<div className="juya-editorial-opening-copy">
 						<EntryTitle entry={entry} onOpenLink={onOpenLink} />
 						{entry.lead && <Lead lead={entry.lead} />}
+						{openingImageIndex > 0 &&
+							blocks.slice(0, openingImageIndex).map((block, index) =>
+								block.kind === "paragraph" ? <p key={index}>{block.text}</p> : null,
+							)}
 					</div>
 					{openingImage?.kind === "image" && (
 						<figure className="juya-plate juya-editorial-opening-image">
@@ -58,7 +65,7 @@ function EditorialEntry({
 				</>
 			)}
 			{blocks.map((block, index) => {
-				if (block === openingImage) return null;
+				if (openingImageIndex >= 0 && index <= openingImageIndex) return null;
 				if (block.kind === "paragraph") return <p key={index}>{block.text}</p>;
 				return (
 					<figure className="juya-plate" key={index}>

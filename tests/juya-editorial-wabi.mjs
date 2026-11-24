@@ -25,7 +25,7 @@ do {
 } while (chromiumBlockedPorts.has(serverPort));
 const url = `http://127.0.0.1:${serverPort}/ai-news/`;
 const xmlEscape = value => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-const html = `<h1>橘鸦AI早报 2026-09-01</h1><h2>概览</h2><ul><li><a href="https://example.com/story">来源标题 ↗</a></li></ul><h2>要闻</h2><h3><a href="https://example.com/story">图文次序验证</a> <code>#1</code></h3><blockquote>开篇导语</blockquote><p><img src="https://assets.juya.uk/one.webp" alt="第一张图"></p><p>第一段</p><p><img src="https://assets.juya.uk/two.webp" alt="第二张图"></p><p>第二段</p><p>相关链接：</p><ul><li><a href="https://example.com/ref">原文</a></li></ul>`;
+const html = `<h1>橘鸦AI早报 2026-09-01</h1><h2>概览</h2><ul><li><a href="https://example.com/story">来源标题 ↗</a></li></ul><h2>要闻</h2><h3><a href="https://example.com/story">图文次序验证</a> <code>#1</code></h3><blockquote>开篇导语</blockquote><p>图前段落</p><p><img src="https://assets.juya.uk/one.webp" alt="第一张图"></p><p>图后段落</p><p><img src="https://assets.juya.uk/two.webp" alt="第二张图"></p><p>末尾段落</p><p>相关链接：</p><ul><li><a href="https://example.com/ref">原文</a></li></ul>`;
 const malformed = `<h1>无法解析的条目</h1><p>通用阅读回退内容</p>`;
 const feed = `<?xml version="1.0"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>橘鸦AI早报</title><item><title>2026-09-01</title><link>https://daily.juya.uk/issues/2026-09-01/</link><guid>valid</guid><pubDate>Tue, 01 Sep 2026 01:36:00 GMT</pubDate><description>次序测试期号</description><content:encoded>${xmlEscape(html)}</content:encoded></item><item><title>2026-08-31</title><link>https://daily.juya.uk/issues/2026-08-31/</link><guid>fallback</guid><pubDate>Mon, 31 Aug 2026 01:36:00 GMT</pubDate><description>普通阅读回退</description><content:encoded>${xmlEscape(malformed)}</content:encoded></item></channel></rss>`;
 const image = await readFile("public/avatar.webp");
@@ -79,7 +79,7 @@ try {
         assert.equal(await page.locator(".juya-overview a").getAttribute("target"), "_blank", "overview links use the web-safe new-tab contract");
         assert.equal(await page.locator(".juya-entry h3 a").getAttribute("target"), "_blank", "entry links use the web-safe new-tab contract");
         const content = await page.locator(".juya-entry").first().locator("p:not(.juya-links-label), figure").evaluateAll(nodes => nodes.map(node => node.matches("figure") ? node.querySelector("img")?.alt : node.textContent?.trim()));
-        assert.deepEqual(content, ["第一张图", "第一段", "第二张图", "第二段"], `${variant} keeps the opening image and recognized text/image sequence readable`);
+        assert.deepEqual(content, ["图前段落", "第一张图", "图后段落", "第二张图", "末尾段落"], `${variant} keeps recognized paragraphs and images in source DOM order`);
         assert.ok(await page.locator(".juya-date-line, .wabi-reading-craft-date").count(), `${variant} shows a publication date in the reading masthead`);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${variant} reader has no horizontal overflow at ${width}px`);
         await page.screenshot({ path: resolve(output, `${variant}-${width}-reader.png`), fullPage: true, animations: "disabled" });
