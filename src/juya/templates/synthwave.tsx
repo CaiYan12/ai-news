@@ -23,8 +23,8 @@ function IssueView({ article, issue, onOpenLink, variantId }: JuyaIssueProps): J
 				{issue.overview && (
 					<OverviewItems overview={issue.overview} onOpenLink={onOpenLink} />
 				)}
-				{issue.sections.map((section) => (
-					<section className="juya-section" key={section.heading}>
+				{issue.sections.map((section, sectionIndex) => (
+					<section className="juya-section" key={`${section.heading}-${sectionIndex}`}>
 						<h2>{section.heading}</h2>
 						{section.entries.map((entry, i) => (
 							<article className="juya-entry" key={i}>
