@@ -38,7 +38,7 @@ export default function App(): JSX.Element {
 		if (article) {
 			return (
 				<div className="flex min-h-screen flex-col">
-					<div className="sticky top-0 z-30">
+					<div className="sticky top-0 z-30" data-reader-header>
 						<TopBar />
 						<ReaderToolbar article={article} />
 					</div>

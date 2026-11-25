@@ -76,7 +76,7 @@ try {
         const issue = page.locator("[data-zoom-content] [data-juya-variant]");
         await issue.waitFor();
         assert.equal(await issue.getAttribute("data-juya-variant"), variant, `${variant} is applied on the reading page`);
-        assert.equal(await page.locator(".juya-overview a").getAttribute("target"), "_blank", "overview links use the web-safe new-tab contract");
+        assert.ok(await issue.getByRole("button", { name: "来源标题", exact: true }).isVisible(), "the overview title with the same source offers an in-page jump");
         assert.equal(await page.locator(".juya-entry h3 a").getAttribute("target"), "_blank", "entry links use the web-safe new-tab contract");
         const content = await page.locator(".juya-entry").first().locator("p:not(.juya-links-label), figure").evaluateAll(nodes => nodes.map(node => node.matches("figure") ? node.querySelector("img")?.alt : node.textContent?.trim()));
         assert.deepEqual(content, ["图前段落", "第一张图", "图后段落", "第二张图", "末尾段落"], `${variant} keeps recognized paragraphs and images in source DOM order`);

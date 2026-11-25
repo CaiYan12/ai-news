@@ -23,10 +23,12 @@ export interface JuyaOverviewEntry {
 	href: string | null;
 	/** 条目编号（code 内 "#N" 的 N）；缺失为 null */
 	index: string | null;
+	targetId: string | null;
 }
 
 export interface JuyaEntry {
 	title: string;
+	anchorId: string;
 	/** 条目标题外链；缺失为 null */
 	titleLink: string | null;
 	index: string | null;
@@ -66,18 +68,40 @@ function extractIndex(el: Element | null): string | null {
 function parseOverviewLi(li: Element): JuyaOverviewEntry {
 	const code = li.querySelector("code");
 	const index = extractIndex(code);
-	const link = li.querySelector("a");
+	const href = li.querySelector("a")?.getAttribute("href")?.trim() ?? "";
 	const cloned = li.cloneNode(true) as Element;
 	cloned.querySelectorAll("code").forEach((c) => c.remove());
 	const title = (cloned.textContent ?? "")
 		.replace(/↗/g, "")
 		.replace(/\s+/g, " ")
 		.trim();
-	return { title, href: link?.getAttribute("href") ?? null, index };
+	return {
+		title,
+		href: /^(?:https?:)?\/\//i.test(href) ? href : null,
+		index,
+		targetId: null,
+	};
+}
+
+function findOverviewTarget(item: JuyaOverviewEntry, entries: JuyaEntry[]): JuyaEntry | null {
+	const [first, ...rest] = [
+		entries.filter((entry) => item.index !== null && entry.index === item.index),
+		entries.filter((entry) => item.title !== "" && entry.title === item.title),
+		entries.filter((entry) => item.href && entry.titleLink === item.href),
+	].filter((matches) => matches.length > 0);
+	// 有命中的线索必须指向同一个条目。单凭编号不能覆盖标题或来源冲突。
+	const matches = first?.filter((entry) => rest.every((group) => group.includes(entry)));
+	if (matches?.length !== 1) return null;
+	const [target] = matches;
+	const titleMatches = item.title && item.title === target.title;
+	const sourceMatches = item.href && item.href === target.titleLink;
+	const titleConflicts = item.title && target.title && !titleMatches;
+	const sourceConflicts = item.href && target.titleLink && !sourceMatches;
+	return (titleConflicts || sourceConflicts) && !titleMatches && !sourceMatches ? null : target;
 }
 
 /** 解析一个全文条目：h3 标题及其后续兄弟节点（直到下一个 h3/h2） */
-function parseEntry(h3: Element): JuyaEntry {
+function parseEntry(h3: Element, anchorId: string): JuyaEntry {
 	const headingLink = h3.querySelector("a");
 	const code = h3.querySelector("code");
 	const clonedH3 = h3.cloneNode(true) as Element;
@@ -86,6 +110,7 @@ function parseEntry(h3: Element): JuyaEntry {
 
 	const entry: JuyaEntry = {
 		title,
+		anchorId,
 		titleLink: headingLink?.getAttribute("href") ?? null,
 		index: extractIndex(code),
 		lead: null,
@@ -157,6 +182,7 @@ export function parseJuyaIssue(html: string): JuyaIssue | null {
 
 	const sections: JuyaSection[] = [];
 	let overview: JuyaOverviewEntry[] | undefined;
+	let entryOrdinal = 0;
 
 	// 按文档顺序遍历 h2/h3，把 h3 条目归入其前方最近的 h2 栏目
 	const headings = [...body.querySelectorAll("h2, h3")];
@@ -184,7 +210,7 @@ export function parseJuyaIssue(html: string): JuyaIssue | null {
 			}
 		} else {
 			// h3：仅当处于某个非概览栏目内时作为条目标题
-			if (current) current.entries.push(parseEntry(h));
+			if (current) current.entries.push(parseEntry(h, `juya-entry-${entryOrdinal++}`));
 		}
 	}
 
@@ -195,6 +221,17 @@ export function parseJuyaIssue(html: string): JuyaIssue | null {
 		heading,
 		sections: sections.filter((s) => s.entries.length > 0),
 	};
-	if (overview) issue.overview = overview;
+	if (overview) {
+		const entries = issue.sections.flatMap((section) => section.entries);
+		issue.overview = overview.map((item) => {
+			if (!item.title) return item;
+			const target = findOverviewTarget(item, entries);
+			if (!target) return item;
+			if (item.href && item.href !== target.titleLink && !target.links.some((link) => link.href === item.href)) {
+				target.links.push({ href: item.href, text: "查看来源" });
+			}
+			return { ...item, targetId: target.anchorId };
+		});
+	}
 	return issue;
 }

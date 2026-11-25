@@ -5,7 +5,7 @@ import type {
 	JuyaIssueProps,
 	JuyaFeedProps,
 } from "../templateTypes";
-import { EntryBlocks, OverviewItems } from "./shared";
+import { EntryBlocks, EntryTitle, OverviewItems } from "./shared";
 import { useAppStore } from "../../stores/useAppStore";
 import { ArticleActions } from "../../components/ArticleActions";
 
@@ -62,30 +62,7 @@ export function makeJuyaTemplate(opts: TemplateOptions): JuyaTemplate {
 							<h2>{section.heading}</h2>
 							{section.entries.map((entry, i) => (
 								<article className="juya-entry" key={i}>
-									<h3>
-										{entry.titleLink ? (
-											<a
-												href={entry.titleLink}
-												target="_blank"
-												rel="noopener noreferrer"
-												onClick={(e) => {
-													e.preventDefault();
-													onOpenLink(
-														entry.titleLink as string,
-													);
-												}}
-											>
-												{entry.title}
-											</a>
-										) : (
-											entry.title
-										)}
-										{entry.index && (
-											<span className="juya-index">
-												#{entry.index}
-											</span>
-										)}
-									</h3>
+									<EntryTitle entry={entry} onOpenLink={onOpenLink} />
 									{entryColumns ? (
 										<div className="juya-entry-columns">
 											<EntryBlocks

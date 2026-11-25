@@ -66,6 +66,30 @@
   text-decoration: none;
 }
 
+.juya-overview li > :not(.juya-index) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.juya-overview button {
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.juya-overview .juya-overview-source {
+  margin-inline-start: 0.5em;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.juya-entry h3[tabindex="-1"]:focus-visible {
+  outline: 2px solid var(--jy-focus);
+  outline-offset: 2px;
+}
+
 .juya-section {
   margin-bottom: 32px;
 }
@@ -1407,7 +1431,7 @@
    条目标题链接刻意不加常驻下划线——「标题静默、hover 才下划线」是 90 年代报刊的
    印刷惯例（标题不抢正文的墨线），属故意例外，勿统一成常驻下划线。 */
 .jynews .juya-entry h3 a:hover,
-.jynews .juya-overview a:hover,
+.jynews .juya-overview :is(a, button):hover,
 .jynews .juya-links a:hover {
   color: var(--jy-accent);
 }

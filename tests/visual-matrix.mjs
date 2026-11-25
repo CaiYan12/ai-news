@@ -88,7 +88,7 @@ try {
             } else if (!historicalComparison) {
               assert.ok(await page.locator(".juya-issue").isVisible(), `${style}-${scheme} detail has a visible issue anchor`);
               assert.ok((await page.locator(".juya-masthead h1").first().innerText()).trim().length > 0, `${style}-${scheme} detail masthead has a title`);
-              assert.ok(await page.locator(".juya-overview a[href^='https://']").count() > 0, `${style}-${scheme} detail preserves an outbound overview link`);
+              assert.ok(await page.locator(".juya-entry h3 a[href^='https://']").count() > 0, `${style}-${scheme} detail preserves an outbound source link`);
             }
             const imageState = await page.locator("[data-juya-variant] img").evaluateAll(images => images.map(img => ({src:img.currentSrc || img.src, complete:img.complete, naturalWidth:img.naturalWidth, naturalHeight:img.naturalHeight})));
             if (!historicalComparison) {
@@ -182,6 +182,21 @@ try {
               const images = [...document.querySelectorAll('[data-juya-variant] img')].map(img => ({src:img.currentSrc || img.src, complete:img.complete, naturalWidth:img.naturalWidth, naturalHeight:img.naturalHeight}));
               return {title:document.title, bodyText:document.body.innerText, documentHeight:document.documentElement.scrollHeight, horizontalOverflow:document.documentElement.scrollWidth > window.innerWidth, anchors:document.querySelectorAll('[data-juya-variant] a[href]').length, images, header:box(document.querySelector('header')), content:box(document.querySelector('[data-zoom-content]')), variant:document.querySelector('[data-juya-variant]')?.getAttribute('data-juya-variant'), refreshDisabled:document.querySelector('button[title="刷新"]')?.disabled};
             });
+            if (!historicalComparison && view === "detail") {
+              const title = "DeepSeek 开源 DeepSeek-V4-Flash-Vision-Exp 模型";
+              const issueUrl = page.url();
+              await page.locator(".juya-overview").getByRole("button", { name: title, exact: true }).click();
+              const heading = page.locator(".juya-entry").getByRole("heading", { level: 3, name: new RegExp(title) });
+              const landing = await heading.evaluate(node => ({
+                focused: node === document.activeElement,
+                top: node.getBoundingClientRect().top,
+                bottom: node.getBoundingClientRect().bottom,
+                headerBottom: document.querySelector("[data-reader-header]").getBoundingClientRect().bottom,
+                viewportBottom: window.innerHeight,
+              }));
+              assert.ok(landing.focused && landing.top > landing.headerBottom && landing.bottom <= landing.viewportBottom, `${id} lands visibly below the sticky header: ${JSON.stringify(landing)}`);
+              assert.equal(page.url(), issueUrl, `${id} retains the issue URL`);
+            }
             results.push({id, metrics, headingContrast, errors:[...errors], imageUrls:[...imageUrls]});
           }
           await context.close();

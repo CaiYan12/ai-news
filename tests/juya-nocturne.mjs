@@ -73,7 +73,7 @@ try {
       await issue.waitFor();
       assert.equal(await issue.getAttribute("data-juya-variant"), variant);
       assert.equal(await page.locator(".juya-entry").count(), 1, (await issue.evaluate(node => node.outerHTML)).slice(0, 1600));
-      assert.equal(await page.locator(".juya-overview a").getAttribute("target"), "_blank");
+      assert.ok(await issue.getByRole("button", { name: "来源标题", exact: true }).isVisible());
       assert.equal(await page.locator(".juya-entry h3 a").getAttribute("target"), "_blank");
       await page.screenshot({ path: resolve(output, `${width}-${scheme}-reader.png`), fullPage: true, animations: "disabled" });
       await page.reload();

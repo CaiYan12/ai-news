@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { makeJuyaTemplate } from "./base";
-import { OverviewItems } from "./shared";
+import { EntryTitle, OverviewItems } from "./shared";
 import type { JuyaContentBlock, JuyaEntry, JuyaImage, JuyaLink } from "../parseJuyaIssue";
 import type { JuyaIssueProps } from "../templateTypes";
 import "../folio.css";
@@ -49,35 +49,6 @@ function EntryFlow({ entry }: { entry: JuyaEntry }): JSX.Element {
 				return <Plate key={i} image={block.image} inset right={right} />;
 			})}
 		</>
-	);
-}
-
-function EntryTitle({
-	entry,
-	onOpenLink,
-}: {
-	entry: JuyaEntry;
-	onOpenLink: (href: string) => void;
-}): JSX.Element {
-	return (
-		<h3>
-			{entry.titleLink ? (
-				<a
-					href={entry.titleLink}
-					target="_blank"
-					rel="noopener noreferrer"
-					onClick={(event) => {
-						event.preventDefault();
-						onOpenLink(entry.titleLink as string);
-					}}
-				>
-					{entry.title}
-				</a>
-			) : (
-				entry.title
-			)}
-			{entry.index && <span className="juya-index">#{entry.index}</span>}
-		</h3>
 	);
 }
 

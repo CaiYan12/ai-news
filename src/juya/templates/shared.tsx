@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { JuyaEntry, JuyaOverviewEntry } from "../parseJuyaIssue";
 
 export function sourceHostname(sourceUrl: string): string {
@@ -17,7 +18,7 @@ export function EntryTitle({
 	onOpenLink: (href: string) => void;
 }): JSX.Element {
 	return (
-		<h3>
+		<h3 id={entry.anchorId} tabIndex={-1}>
 			{entry.titleLink ? (
 				<a
 					href={entry.titleLink}
@@ -122,8 +123,44 @@ export function EntrySplit({
 	);
 }
 
-/** 语义层共享构件：只负责「语义模型 → 安全的 React 元素」映射（文本经 React 转义，
- *  链接经 onOpenLink 拦截，图片懒加载）。版式差异由各风格模板的组合方式与 CSS 承担。 */
+function scrollToEntry(targetId: string): (() => void) | undefined {
+	const heading = document.getElementById(targetId);
+	if (!heading) return;
+	const header = document.querySelector("[data-reader-header]");
+	const scrollBelowHeader = (behavior: ScrollBehavior) => {
+		const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
+		window.scrollBy({
+			top: heading.getBoundingClientRect().top - headerBottom - 12,
+			behavior,
+		});
+	};
+	const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	heading.focus({ preventScroll: true });
+	scrollBelowHeader(reduceMotion ? "instant" : "smooth");
+
+	const issue = heading.closest(".juya-issue");
+	if (!issue) return;
+	let headingPosition = heading.getBoundingClientRect().top + window.scrollY;
+	const observer = new ResizeObserver(() => {
+		const newPosition = heading.getBoundingClientRect().top + window.scrollY;
+		if (Math.abs(newPosition - headingPosition) < 1) return;
+		headingPosition = newPosition;
+		scrollBelowHeader("instant");
+	});
+	const controller = new AbortController();
+	const stopFollowing = () => {
+		observer.disconnect();
+		controller.abort();
+	};
+	// 前方图片加载会移动标题。读者恢复操作后把滚动控制交还给浏览器。
+	const { signal } = controller;
+	heading.addEventListener("blur", stopFollowing, { signal });
+	for (const event of ["keydown", "pointerdown", "wheel"]) {
+		window.addEventListener(event, stopFollowing, { passive: true, signal });
+	}
+	observer.observe(issue);
+	return stopFollowing;
+}
 
 export function OverviewItems({
 	overview,
@@ -132,25 +169,44 @@ export function OverviewItems({
 	overview: JuyaOverviewEntry[];
 	onOpenLink: (href: string) => void;
 }): JSX.Element {
+	const stopFollowing = useRef<(() => void) | undefined>(undefined);
+	useEffect(() => () => stopFollowing.current?.(), []);
+
 	return (
 		<ul className="juya-overview">
-			{overview.map((o, i) => (
+			{overview.map(({ title, index, targetId, href }, i) => (
 				<li key={i}>
-					{o.index && <span className="juya-index">{o.index}</span>}
-					{o.href ? (
-						<a
-							href={o.href}
-							target="_blank"
-							rel="noopener noreferrer"
-							onClick={(e) => {
-								e.preventDefault();
-								onOpenLink(o.href as string);
+					{index && <span className="juya-index">{index}</span>}
+					{targetId ? (
+						<button
+							type="button"
+							aria-controls={targetId}
+							onClick={() => {
+								stopFollowing.current?.();
+								stopFollowing.current = scrollToEntry(targetId);
 							}}
 						>
-							{o.title}
-						</a>
+							{title}
+						</button>
 					) : (
-						<span>{o.title}</span>
+						<span>
+							<span>{title}</span>
+							{href && (
+								<a
+									className="juya-overview-source"
+									href={href}
+									target="_blank"
+									rel="noopener noreferrer"
+									aria-label={title ? `查看来源（${title}）` : undefined}
+									onClick={(event) => {
+										event.preventDefault();
+										onOpenLink(href);
+									}}
+								>
+									查看来源
+								</a>
+							)}
+						</span>
 					)}
 				</li>
 			))}

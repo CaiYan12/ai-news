@@ -554,7 +554,7 @@
    与暗侧同一写法 —— Chromium UA 的 auto 焦点圈忽略作者 outline-color，必须写完整简写。
    取色来源：--jy-focus #4f5ed8（本变体既有靛蓝 accent，零新增色相）；
    对比度：对 --jy-bg #fbfbfc 5.1735:1 ≥ 非文本 UI 3:1。 */
-[data-juya-variant='nocturne-light'].jynoct .juya-overview a:focus-visible {
+[data-juya-variant='nocturne-light'].jynoct .juya-overview :is(a, button):focus-visible {
   outline: 2px solid var(--jy-focus);
   outline-offset: 2px;
 }
@@ -1512,8 +1512,7 @@
   }
 }
 
-/* ③ hover 整行微亮：底层 `.juya-overview a:hover`（(0,2,1)）已给下划线，本票只补整行底色，
-   基层一字未动。描在 li 上而非 a 上 —— a 只覆盖标题文字，li 才是一整行（序号 + 标题 + 行内衬）。
+/* ③ 概览悬停时高亮整行（序号 + 标题 + 行内衬）。
    底色 rgba(110, 123, 255, 0.06)：取色来源 = 本变体 --jy-accent #6e7bff（零新增颜色），
    叠在 nebula 最坏合成底 #18192a 上得 #1d1f37，其上目录正文 --jy-text #c4c5cc 的 WCAG 对比度
    实算 9.36:1 ≥ 4.5（hover 态不得降低可读性）。alpha 压在 0.06 是「微亮」标定——再亮就成色块。
@@ -1529,7 +1528,7 @@
    取色来源：本变体 --jy-focus #8b97ff（既有焦点色，零新增色相）。WCAG 对比度：对页面底
    --jy-bg #0a0a0c 实算 **7.5058:1** ≥ 非文本 UI 3:1（scripts/nocturne-contrast-audit.mjs
    新增行同口径实读本规则）。
-   **行高亮**：`li:has(a:focus-visible)` —— 「祖先包含聚焦元素」写法，与上面 hover 同为
+   **行高亮**：列表项包含键盘聚焦的控件时，与上面 hover 同为
    rgba(110,123,255,0.06) 整行底色（取色来源 = 本变体 --jy-accent #6e7bff，见上方 hover 条；
    对比度：叠 nebula 最坏合成底 #18192a 上目录正文 --jy-text 为 9.36:1）。
    **严禁 `:focus-within`**：鼠标点击链接同样会命中它，键盘与指针用户将无法区分；
@@ -1538,7 +1537,7 @@
    内 2px 宽 + 2px 偏移，有余量）；条目间发丝线是 `li + li::after`（top: -3.5px，落在 6px 间隙
    中点、在行盒**之外**），焦点行底色画在 li 的 background 层、发丝线是更上层的伪元素 ⇒ 线不会被
    行底色盖住。环用 outline（边框盒之外），不参与行底色合成。 */
-[data-juya-variant='nocturne-dark'].jynoct .juya-overview a:focus-visible {
+[data-juya-variant='nocturne-dark'].jynoct .juya-overview :is(a, button):focus-visible {
   outline: 2px solid var(--jy-focus);
   outline-offset: 2px;
   border-radius: 2px;
@@ -1547,7 +1546,7 @@
 /* 焦点行整行高亮：取色来源 = 本变体 --jy-accent #6e7bff（与上面 hover 同一 rgba 字面值）；
    WCAG 对比度：叠 nebula 最坏合成底 #18192a 后，目录正文 --jy-text #c4c5cc 实算 9.36:1 ≥ 4.5。
    与 hover 同底色是有意为之：键盘焦点与指针悬停提供同一「当前行」视觉语义。 */
-[data-juya-variant='nocturne-dark'].jynoct .juya-overview li:has(a:focus-visible) {
+[data-juya-variant='nocturne-dark'].jynoct .juya-overview li:has(:is(a, button):focus-visible) {
   background: rgba(110, 123, 255, 0.06);
 }
 
