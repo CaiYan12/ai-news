@@ -9,6 +9,10 @@ export interface JuyaImage {
 	alt: string;
 }
 
+export type JuyaContentBlock =
+	| { kind: "paragraph"; text: string }
+	| { kind: "image"; image: JuyaImage };
+
 export interface JuyaLink {
 	text: string;
 	href: string;
@@ -31,6 +35,8 @@ export interface JuyaEntry {
 	/** 正文段落文本（不含「相关链接：」引导段与其后的链接列表） */
 	paragraphs: string[];
 	images: JuyaImage[];
+	/** 正文段落和图片的原始出现顺序，供保留图文流的版式使用。 */
+	blocks: JuyaContentBlock[];
 	/** 「相关链接」列表 */
 	links: JuyaLink[];
 }
@@ -85,6 +91,7 @@ function parseEntry(h3: Element): JuyaEntry {
 		lead: null,
 		paragraphs: [],
 		images: [],
+		blocks: [],
 		links: [],
 	};
 
@@ -95,18 +102,25 @@ function parseEntry(h3: Element): JuyaEntry {
 		if (tag === "BLOCKQUOTE" && entry.lead === null && !linksStarted) {
 			entry.lead = (node.textContent ?? "").trim() || null;
 		} else if (tag === "P") {
-			for (const img of node.querySelectorAll("img")) {
-				entry.images.push({
-					src: img.getAttribute("src") ?? "",
-					alt: img.getAttribute("alt") ?? "",
-				});
-			}
+			// Preserve the pre-existing structured recognition contract: image-bearing paragraphs
+			// contribute image blocks only; surrounding paragraph text remains intentionally excluded.
+			// `blocks` preserves the source order of the already-recognized paragraph/image units.
+			const images = [...node.querySelectorAll("img")].map((img) => ({
+				src: img.getAttribute("src") ?? "",
+				alt: img.getAttribute("alt") ?? "",
+			}));
+			entry.images.push(...images);
 			const text = (node.textContent ?? "").trim();
-			if (text && node.querySelector("img") === null) {
+			if (images.length > 0) {
+				entry.blocks.push(
+					...images.map((image) => ({ kind: "image" as const, image })),
+				);
+			} else if (text) {
 				if (/^相关链接[：:]?\s*$/.test(text)) {
 					linksStarted = true;
 				} else if (!linksStarted) {
 					entry.paragraphs.push(text);
+					entry.blocks.push({ kind: "paragraph", text });
 				}
 			}
 		} else if (tag === "UL" || tag === "OL") {

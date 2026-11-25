@@ -25,4 +25,5 @@ export interface JuyaTemplate {
 	FeedList: ComponentType<JuyaFeedProps>;
 }
 
-export type JuyaStyleKey = Exclude<JuyaStyleId, "off">;
+/** Runtime templates exclude `card`, which remains only as a persisted legacy id for migration. */
+export type JuyaStyleKey = Exclude<JuyaStyleId, "off" | "card">;

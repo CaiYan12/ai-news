@@ -17,9 +17,17 @@ try{
     const context=await browser.newContext({viewport:{width,height:width===390?844:900},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],steps=[];
     page.on('pageerror',e=>errors.push(`pageerror: ${e.message}`));page.on('console',m=>{if(m.type()==='error')errors.push(`console: ${m.text()}`);});page.on('requestfailed',r=>errors.push(`requestfailed: ${r.url()} ${r.failure()?.errorText}`));
     await page.clock.setFixedTime(new Date('2026-09-02T12:00:00Z'));
+    await page.addInitScript(() => {if(!localStorage.getItem('ai-daily:v1'))localStorage.setItem('ai-daily:v1',JSON.stringify({version:1,settings:{themeMode:'system',juyaLightStyleId:'dreamcore',juyaDarkStyleId:'dreamcore',historyRetentionDays:0},articles:[],history:{},lastRefreshedAt:null}));});
     await page.route('https://daily.juya.uk/rss.xml',r=>r.fulfill({status:200,contentType:'application/xml',headers:{'access-control-allow-origin':'*'},body:feed}));
     await page.route('**/*',r=>r.request().resourceType()==='image'&&!r.request().url().startsWith(url)?r.fulfill({status:200,contentType:'image/webp',body:image}):r.fallback());
     await page.goto(url);const items=page.locator('.juya-feed-item, article[role="button"]');await items.first().waitFor();assert.equal(await items.count(),10);
+    await page.locator('[data-juya-variant="synthwave-light"]').waitFor();
+    await page.waitForFunction(()=>{const s=JSON.parse(localStorage.getItem('ai-daily:v1')||'null')?.settings;return s?.juyaLightStyleId==='synthwave'&&s?.juyaDarkStyleId==='synthwave';});
+    assert.equal(await page.locator('.juya-scene').count(),1);
+    assert.equal(await page.locator('.juya-root').evaluate(e=>getComputedStyle(e).animationName),'none');
+    await page.getByTitle('设置',{exact:true}).click();await choose(page,'亮色侧','千禧网页式');await choose(page,'暗色侧','千禧网页式');await page.keyboard.press('Escape');await page.getByRole('dialog').waitFor({state:'hidden'});
+    await page.locator('[data-juya-variant="y2k-light"]').first().waitFor();
+    await page.waitForFunction(()=>{const s=JSON.parse(localStorage.getItem('ai-daily:v1')||'null')?.settings;return s?.juyaLightStyleId==='y2k'&&s?.juyaDarkStyleId==='y2k';});
     if(width===390)await page.getByRole('button',{name:'筛选',exact:true}).click();
     const button=(label,count)=>page.getByRole('button',{name:new RegExp(`^${label}\\s*${count}$`)});
     assert.equal(await button('全部',10).count(),1);assert.equal(await button('未读',10).count(),1);assert.equal(await button('收藏',0).count(),1);assert.equal(await button('稍后读',0).count(),1);

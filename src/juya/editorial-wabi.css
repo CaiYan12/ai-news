@@ -1,0 +1,1239 @@
+/* ---- 杂志编辑式（2026-09-24 重设计新增） ----
+   与 newsprint90s 的市井报刊对照的高端杂志：纯平留白，刊物感靠排版 */
+[data-juya-variant='editorial-light'] {
+  --jy-bg: #fbf9f4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.52 0 0 0 0 0.46 0 0 0 0.03 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  --jy-card: #ffffff;
+  --jy-border: #d8d2c4;
+  --jy-heading: #14120e;
+  --jy-text: #2e2b24;
+  --jy-muted: #6e6a5e;
+  --jy-accent: #8a2f2b;
+  --jy-on-accent: #faf6ee;
+  --jy-link: #7a2825;
+  --jy-lead-bg: #f4f0e6;
+  --jy-focus: #8a2f2b;
+  --jy-radius: 2px;
+  --jy-font-heading: 'Noto Serif SC', 'Source Han Serif SC', Georgia, 'Times New Roman', serif;
+  --jy-font-body: 'Helvetica Neue', Helvetica, 'Segoe UI', 'Noto Sans SC', sans-serif;
+}
+
+[data-juya-variant='editorial-dark'] {
+  --jy-bg: #131210;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.75 0 0 0 0 0.72 0 0 0 0 0.65 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  --jy-card: #1c1a17;
+  --jy-border: #35312a;
+  --jy-heading: #ede8dd;
+  --jy-text: #c5bfb2;
+  --jy-muted: #8b8577;
+  --jy-accent: #c86b5f;
+  --jy-on-accent: #161310;
+  --jy-link: #cf7d6f;
+  --jy-lead-bg: #1e1c18;
+  --jy-focus: #d08a7d;
+  --jy-radius: 2px;
+  --jy-font-heading: 'Noto Serif SC', 'Source Han Serif SC', Georgia, 'Times New Roman', serif;
+  --jy-font-body: 'Helvetica Neue', Helvetica, 'Segoe UI', 'Noto Sans SC', sans-serif;
+}
+
+/* 双发丝线书眉；巨型衬线刊头；悬挂栏目序号（CSS 计数器）；导语首字下沉 */
+.jyedit .juya-issue {
+  max-width: 860px;
+  counter-reset: jysec;
+}
+
+.jyedit .juya-masthead {
+  border-top: 1px solid var(--jy-border);
+  border-bottom: 1px solid var(--jy-border);
+  padding: 18px 0 14px;
+  position: relative;
+}
+
+.jyedit .juya-masthead::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--jy-border);
+}
+
+.jyedit .juya-masthead h1 {
+  font-size: 42px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.jyedit .juya-date-line {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--jy-muted);
+  margin-top: 8px;
+}
+
+.jyedit .juya-section > h2 {
+  counter-increment: jysec;
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 600;
+  border-bottom: 1px solid var(--jy-border);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.jyedit .juya-section > h2::before {
+  content: counter(jysec, decimal-leading-zero) ' / ';
+  font-style: italic;
+  font-weight: 400;
+  color: var(--jy-accent);
+}
+
+.jyedit .juya-section > .juya-entry:first-of-type .juya-lead::first-letter {
+  font-family: var(--jy-font-heading);
+  font-size: 2.6em;
+  font-weight: 700;
+  float: left;
+  line-height: 0.85;
+  padding: 4px 8px 0 0;
+  color: var(--jy-accent);
+}
+
+.jyedit .juya-entry h3 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* 开篇图只与标题/导语并置；后续内容仍是 article 的常规连续子项。容器查询按实际版心宽度响应内容区缩放。 */
+.jyedit .juya-issue {
+  container-type: inline-size;
+  container-name: editorial-reading;
+}
+
+.jyedit .juya-editorial-opening {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.jyedit .juya-editorial-opening-copy,
+.jyedit .juya-editorial-opening-image {
+  min-width: 0;
+}
+
+.jyedit .juya-editorial-opening-copy .juya-lead {
+  margin-bottom: 0;
+}
+
+.jyedit .juya-editorial-opening-image {
+  width: 100%;
+  margin: 0;
+}
+
+@container editorial-reading (min-width: 700px) {
+  .jyedit .juya-editorial-opening[data-image-layout='landscape'] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 28px;
+    align-items: start;
+  }
+}
+
+.jyedit .juya-entry p {
+  max-width: 68ch;
+}
+
+.jyedit .juya-section {
+  margin-top: 44px;
+}
+
+.jyedit .juya-entry p:not(.juya-links-label) {
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+/* 第二轮定制排版：deck 副题、colophon 刊尾、装裱题注、裁切角标 */
+.jyedit .juya-deck {
+  max-width: 68ch;
+  margin: -8px 0 24px;
+  text-align: left;
+  font-family: var(--jy-font-heading);
+  font-style: normal;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--jy-muted);
+}
+
+.jyedit .juya-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+  row-gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .jyedit .juya-overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.jyedit .juya-entry + .juya-entry {
+  border-top: 1px solid var(--jy-border);
+  padding-top: 28px;
+}
+
+.jyedit .juya-plate {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.jyedit .juya-plate figcaption {
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.jyedit .juya-colophon {
+  margin-top: 48px;
+  padding-top: 12px;
+  border-top: 3px double var(--jy-border);
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--jy-muted);
+}
+
+.jyedit .juya-issue {
+  position: relative;
+}
+
+.jyedit .juya-issue::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 24px;
+  height: 24px;
+  border-top: 1px solid var(--jy-border);
+  border-left: 1px solid var(--jy-border);
+}
+
+.jyedit .juya-issue::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 24px;
+  height: 24px;
+  border-right: 1px solid var(--jy-border);
+  border-bottom: 1px solid var(--jy-border);
+}
+
+/* T5 订阅页：封面、日期线、标题层级与留白承载期号，不画整卡边框。 */
+.jyedit .juya-feed {
+  max-width: 1040px;
+  gap: 28px;
+  padding-block: 32px 48px;
+}
+
+.jyedit .juya-feed-grid {
+  column-gap: 32px;
+  row-gap: 40px;
+}
+
+.jyedit .juya-feed-item {
+  overflow: visible;
+  padding: 0 0 18px;
+  border: 0;
+  border-bottom: 1px solid var(--jy-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: color 160ms var(--ease-out, ease-out);
+}
+
+.jyedit .juya-feed-item:hover {
+  transform: none;
+}
+
+.jyedit .juya-feed-item:hover .juya-feed-title {
+  text-decoration: underline;
+  text-decoration-color: var(--jy-accent);
+  text-underline-offset: 4px;
+}
+
+.jyedit .juya-feed-item:focus-visible {
+  outline-color: var(--jy-focus);
+  outline-offset: 0;
+}
+
+.jyedit .juya-feed-cover {
+  display: block;
+  aspect-ratio: 3 / 2;
+  border-bottom: 0;
+  border-radius: 0;
+  margin-bottom: 14px;
+}
+
+.jyedit .juya-feed-body {
+  padding: 0;
+  gap: 8px;
+}
+
+.jyedit .juya-feed-meta {
+  order: 0;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.jyedit .juya-feed-meta > span:not(.juya-feed-read-dot):not(.juya-feed-source) {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.jyedit .juya-feed-source {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  letter-spacing: 0.04em;
+}
+
+.jyedit .juya-feed-title {
+  order: 1;
+  font-size: 18px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.jyedit .juya-feed-summary {
+  order: 2;
+  line-height: 1.65;
+  -webkit-line-clamp: 4;
+}
+
+.jyedit .juya-feed-compact .juya-feed-item {
+  gap: 16px;
+  padding: 14px 0;
+}
+
+.jyedit .juya-feed-compact .juya-feed-cover {
+  width: 96px;
+  height: 64px;
+  aspect-ratio: 3 / 2;
+  flex: none;
+  margin: 0;
+}
+
+.jyedit .juya-feed-compact .juya-feed-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.jyedit .juya-feed-compact .juya-feed-title {
+  font-size: 15px;
+}
+
+.jyedit .juya-feed-featured .juya-feed-title {
+  font-size: 26px;
+}
+
+.jyedit .juya-feed-empty {
+  padding: 40px 0;
+  border-top: 1px solid var(--jy-border);
+  border-bottom: 1px solid var(--jy-border);
+}
+
+/* 订阅页头版（2026-10-24 打样；#78 裁切角标与题注化）：杂志 nameplate——上缘双发丝线、
+   衬线大字源名、host 作大写信息行、下缘 3px double 收底；只承载源身份，期号日期留在卡片。
+   列宽与内衬对齐 .juya-feed 版心，色值全部走 token。 */
+.jyedit .jyedit-feed-masthead {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 44px 24px 18px;
+  border-top: 1px solid var(--jy-border);
+  border-bottom: 3px double var(--jy-border);
+  position: relative;
+}
+
+.jyedit .jyedit-feed-masthead::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--jy-border);
+}
+
+/* #78：L 形裁切角标——阅读页 .juya-issue::before/::after 现值原样搬运
+   （24×24 / 内缩 8px / 1px --jy-border）。绝对定位锚定 padding box：阅读页 .juya-issue
+   无边框，头版容器带上边框（1px）与 3px double 收底，故角标距容器外缘视觉为 9px（顶）/
+   11px（底）、左右仍 8px——声明值逐字同源，e2e 按 padding box 量取内缩。
+   容器 ::before 已被上面第二条上缘发丝线占用，双角标只能落真实 DOM span（模板
+   aria-hidden 对辅助技术静默；pointer-events:none 不拦截点击与选择）。
+   绝对定位收在容器内、零动效、零新增色。 */
+.jyedit .jyedit-feed-masthead-corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.jyedit .jyedit-feed-masthead-corner-tl {
+  top: 8px;
+  left: 8px;
+  border-top: 1px solid var(--jy-border);
+  border-left: 1px solid var(--jy-border);
+}
+
+.jyedit .jyedit-feed-masthead-corner-br {
+  right: 8px;
+  bottom: 8px;
+  border-right: 1px solid var(--jy-border);
+  border-bottom: 1px solid var(--jy-border);
+}
+
+.jyedit .jyedit-feed-masthead-kicker {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--jy-accent);
+}
+
+.jyedit .jyedit-feed-masthead h1 {
+  font-family: var(--jy-font-heading);
+  font-size: clamp(40px, 7vw, 76px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--jy-heading);
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+
+/* #78：host 行题注化——前置 24px 发丝短线（与 nocturne 头版 kicker 收尾线同一发丝
+   词汇），字距 0.18em → 0.08em 对齐阅读页题注语汇（uppercase + 0.08em，
+   .juya-plate figcaption 同款）。刻意不搬阅读页栏目序号：订阅源无真实序号语义，
+   编号即造假信息。 */
+.jyedit .jyedit-feed-masthead-domain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--jy-muted);
+}
+
+.jyedit .jyedit-feed-masthead-domain::before {
+  content: '';
+  flex: none;
+  width: 24px;
+  height: 1px;
+  background: var(--jy-border);
+}
+
+/* ---- 侘寂日杂式（2026-09-24 重设计新增） ----
+   和纸长纤维肌理（各向异性 feTurbulence）；不对称粗陶圆角；陶土/苔色大地双色 */
+[data-juya-variant='wabi-light'] {
+  --jy-bg: #efede6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55 0.09' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.42 0 0 0 0 0.35 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23w)'/%3E%3C/svg%3E");
+  --jy-card: #f7f5ee;
+  --jy-border: #d5d0c2;
+  --jy-heading: #37332b;
+  --jy-text: #4a463c;
+  --jy-muted: #655f4c;
+  --jy-index-text: #82442f;
+  --jy-wabi-lead-text: #655e4d;
+  --jy-accent: #a5654a;
+  --jy-on-accent: #f6f1e8;
+  --jy-link: #59664a;
+  --jy-lead-bg: #e7e3d6;
+  --jy-focus: #a5654a;
+  --jy-radius: 18px 6px 18px 6px;
+  --jy-font-heading: 'Noto Serif SC', 'Songti SC', serif;
+  --jy-font-body: 'Segoe UI', 'Noto Sans SC', sans-serif;
+}
+
+[data-juya-variant='wabi-dark'] {
+  --jy-bg: #1e1c18;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55 0.09' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.75 0 0 0 0 0.72 0 0 0 0 0.65 0 0 0 0.025 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23w)'/%3E%3C/svg%3E");
+  --jy-card: #262420;
+  --jy-border: #3d392f;
+  --jy-heading: #e3ded1;
+  --jy-text: #bdb7a7;
+  --jy-muted: #a39a82;
+  --jy-index-text: #d49a7c;
+  --jy-wabi-lead-text: #a39a82;
+  --jy-accent: #b37a5e;
+  --jy-on-accent: #221c16;
+  --jy-link: #b2bc95;
+  --jy-lead-bg: #292620;
+  --jy-focus: #c99a7d;
+  --jy-radius: 18px 6px 18px 6px;
+  --jy-font-heading: 'Noto Serif SC', 'Songti SC', serif;
+  --jy-font-body: 'Segoe UI', 'Noto Sans SC', sans-serif;
+}
+
+/* 订阅页专用纸层与陶拓色；阅读页继续只消费通用 wabi 色板。 */
+[data-juya-variant='wabi-light'] {
+  --wabi-feed-sheet-front: #f7f5ee;
+  --wabi-feed-sheet-back: #ded8ca;
+  --wabi-feed-page-edge: rgba(120, 94, 66, 0.16);
+  --wabi-feed-fiber: rgba(91, 71, 48, 0.055);
+  --wabi-feed-rub: rgba(111, 67, 45, 0.28);
+  --wabi-feed-rub-line: rgba(111, 67, 45, 0.4);
+  --wabi-feed-shadow: rgba(67, 54, 39, 0.16);
+}
+
+[data-juya-variant='wabi-dark'] {
+  --wabi-feed-sheet-front: #27251f;
+  --wabi-feed-sheet-back: #343128;
+  --wabi-feed-page-edge: rgba(187, 151, 116, 0.16);
+  --wabi-feed-fiber: rgba(207, 194, 169, 0.045);
+  --wabi-feed-rub: rgba(166, 139, 109, 0.3);
+  --wabi-feed-rub-line: rgba(183, 151, 115, 0.42);
+  --wabi-feed-shadow: rgba(0, 0, 0, 0.34);
+}
+
+/* Page-edge fibers belong to the feed composition and stay under its content. */
+.jywabi:has(.wabi-feed-masthead) {
+  position: relative;
+  isolation: isolate;
+}
+
+.jywabi:has(.wabi-feed-masthead)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      var(--wabi-feed-page-edge) 0,
+      transparent 44px,
+      transparent calc(100% - 44px),
+      var(--wabi-feed-page-edge) 100%
+    ),
+    linear-gradient(7deg, transparent 0 44%, var(--wabi-feed-fiber) 45% 58%, transparent 59%)
+      left 10px top 18% / 42px 4px no-repeat,
+    linear-gradient(79deg, transparent 0 42%, var(--wabi-feed-fiber) 43% 57%, transparent 58%)
+      left 25px bottom 23% / 4px 31px no-repeat,
+    linear-gradient(174deg, transparent 0 39%, var(--wabi-feed-fiber) 40% 53%, transparent 54%)
+      right 8px top 58% / 38px 4px no-repeat,
+    linear-gradient(84deg, transparent 0 46%, var(--wabi-feed-fiber) 47% 61%, transparent 62%)
+      right 21px bottom 12% / 4px 27px no-repeat;
+}
+
+.jywabi:has(.wabi-feed-masthead) > .juya-feed {
+  z-index: 1;
+}
+
+.jywabi .wabi-feed-masthead {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  width: min(1120px, 100%);
+  min-height: 264px;
+  margin: 0 auto;
+  padding: 38px clamp(28px, 6.5vw, 76px) 42px;
+}
+
+.jywabi .wabi-feed-masthead::before,
+.jywabi .wabi-feed-masthead::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.jywabi .wabi-feed-masthead::before {
+  inset: 29px 12px 11px 26px;
+  z-index: -2;
+  background: var(--wabi-feed-sheet-back);
+  clip-path: polygon(
+    0.7% 1%, 8% 0, 18% 1.2%, 29% 0.3%, 41% 1.6%, 54% 0.4%, 66% 1.1%, 79% 0,
+    91% 1.3%, 99.3% 0.8%, 99.96% 14%, 99.74% 29%, 100% 42%, 99.73% 57%,
+    99.98% 72%, 99.7% 86%, 100% 98%, 91% 99.3%, 79% 98.8%, 67% 100%, 54% 98.9%,
+    41% 100%, 29% 98.7%, 16% 99.7%, 0.8% 98.8%, 0.1% 88%, 0.4% 74%, 0% 61%,
+    0.3% 47%, 0% 33%, 0.35% 18%
+  );
+  filter: drop-shadow(0 15px 12px var(--wabi-feed-shadow));
+}
+
+.jywabi .wabi-feed-masthead::after {
+  inset: 16px 30px 22px 8px;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at 12% 42%, var(--wabi-feed-fiber) 0 1px, transparent 1.5px),
+    linear-gradient(8deg, transparent 0 44%, var(--wabi-feed-fiber) 45% 58%, transparent 59%)
+      11% 21% / 43px 4px no-repeat,
+    linear-gradient(82deg, transparent 0 43%, var(--wabi-feed-fiber) 44% 57%, transparent 58%)
+      39% 66% / 3px 29px no-repeat,
+    linear-gradient(174deg, transparent 0 41%, var(--wabi-feed-fiber) 42% 55%, transparent 56%)
+      69% 33% / 38px 4px no-repeat,
+    var(--wabi-feed-sheet-front);
+  clip-path: polygon(
+    0.4% 1.1%, 10% 0, 22% 1%, 37% 0.2%, 49% 1.2%, 63% 0, 77% 1%, 91% 0.3%,
+    99.6% 1%, 99.9% 13%, 99.72% 28%, 100% 43%, 99.78% 58%, 99.96% 72%,
+    99.7% 86%, 100% 98.6%, 90% 99.4%, 79% 98.6%, 68% 100%, 55% 98.9%, 41% 100%,
+    28% 98.8%, 16% 99.8%, 0.7% 98.9%, 0.15% 83%, 0.42% 68%, 0% 54%, 0.3% 40%, 0% 25%
+  );
+  filter: drop-shadow(0 10px 9px var(--wabi-feed-shadow));
+}
+
+.jywabi .wabi-feed-masthead-copy {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+
+.jywabi .wabi-feed-masthead-kicker {
+  margin: 0 0 9px;
+  color: var(--jy-muted);
+  font-family: var(--jy-font-heading, serif);
+  font-size: 14px;
+  letter-spacing: 0.24em;
+}
+
+.jywabi .wabi-feed-masthead h1 {
+  max-width: 100%;
+  margin: 0;
+  color: var(--jy-heading);
+  font-family: 'STXingkai', '华文行楷', 'KaiTi', '楷体', 'Kaiti SC', 'STKaiti', var(--jy-font-heading, serif);
+  font-size: clamp(60px, 7.5vw, 100px);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: 0.025em;
+  overflow-wrap: anywhere;
+}
+
+.jywabi .wabi-feed-masthead-domain {
+  position: relative;
+  z-index: 2;
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  padding: 0 0 0 13px;
+  border-left: 1px solid var(--jy-border);
+  color: var(--jy-muted);
+  font-family: var(--jy-font-heading, serif);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  overflow-wrap: anywhere;
+}
+
+.jywabi .wabi-feed-rubbing {
+  position: absolute;
+  top: 51%;
+  right: 18%;
+  z-index: 0;
+  pointer-events: none;
+  width: clamp(136px, 21vw, 260px);
+  height: clamp(96px, 13vw, 164px);
+  opacity: 0.88;
+  transform: translateY(-50%) rotate(-8deg);
+  background: var(--wabi-feed-rub);
+  /* Broken mask paths and coarse alpha grain make the rubbing read as porous clay transfer. */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 160'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.08' numOctaves='3' seed='66' result='noise'/%3E%3CfeColorMatrix in='noise' values='0%200%200%200%200%200%200%200%200%200%200%200%200%200%200%201%200%200%200%200' result='alpha'/%3E%3CfeComponentTransfer in='alpha' result='grainAlpha'%3E%3CfeFuncA type='discrete' tableValues='0%20.12%20.32%20.58%20.82%201'/%3E%3C/feComponentTransfer%3E%3CfeComposite in='SourceGraphic' in2='grainAlpha' operator='in'/%3E%3C/filter%3E%3Cg fill='white' filter='url(%23grain)'%3E%3Cpath d='M12 82 C20 68 31 62 44 65 C50 52 57 41 69 47 C77 50 82 37 94 39 C104 43 109 30 122 34 C132 37 139 28 148 35 C159 41 164 44 175 39 C188 33 194 47 205 45 C217 41 223 51 236 50 C250 49 259 58 270 62 C260 70 253 78 240 79 C229 75 221 86 208 85 C199 82 190 93 179 90 C167 87 162 99 151 100 C139 100 132 91 121 95 C109 100 99 91 88 94 C78 97 69 87 59 91 C49 96 41 85 32 89 C24 92 18 84 12 82 Z'/%3E%3Cpath d='M19 48 C26 40 39 37 47 41 C43 49 31 53 22 54 Z'/%3E%3Cpath d='M190 113 C201 102 217 99 228 105 C223 114 209 121 197 121 Z'/%3E%3Cpath d='M252 35 C258 29 267 27 273 31 C270 39 261 43 254 42 Z'/%3E%3C/g%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+}
+
+.jywabi .wabi-feed-rubbing::before,
+.jywabi .wabi-feed-rubbing::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  background:
+    linear-gradient(166deg, transparent 0 40%, var(--wabi-feed-rub-line) 41% 52%, transparent 53%) 5% 24% / 34% 42% no-repeat,
+    linear-gradient(13deg, transparent 0 44%, var(--wabi-feed-rub-line) 45% 57%, transparent 58%) 38% 46% / 37% 40% no-repeat,
+    linear-gradient(171deg, transparent 0 38%, var(--wabi-feed-rub-line) 39% 50%, transparent 51%) 78% 18% / 22% 40% no-repeat;
+}
+
+.jywabi .wabi-feed-rubbing::before {
+  inset: 17% 14% 31% 9%;
+  transform: rotate(3deg);
+}
+
+.jywabi .wabi-feed-rubbing::after {
+  inset: 37% 6% 12% 24%;
+  background:
+    linear-gradient(12deg, transparent 0 42%, var(--wabi-feed-rub-line) 43% 54%, transparent 55%) 3% 31% / 38% 38% no-repeat,
+    linear-gradient(168deg, transparent 0 39%, var(--wabi-feed-rub-line) 40% 52%, transparent 53%) 54% 13% / 37% 39% no-repeat;
+  transform: rotate(-2deg);
+}
+.jywabi .wabi-feed-masthead + .juya-feed {
+  padding-top: 8px;
+}
+
+@media (max-width: 760px) {
+  .jywabi .wabi-feed-masthead {
+    min-height: 214px;
+    padding: 31px 24px 35px;
+  }
+
+  .jywabi .wabi-feed-masthead h1 {
+    font-size: clamp(42px, 8vw, 60px);
+  }
+
+  .jywabi .wabi-feed-masthead-domain {
+    padding-left: 9px;
+    font-size: 10px;
+  }
+
+  .jywabi .wabi-feed-rubbing {
+    top: 54%;
+    right: 14%;
+    width: clamp(84px, 15vw, 120px);
+    height: clamp(68px, 10vw, 84px);
+    opacity: 0.7;
+  }
+}
+
+/* 订阅期号保留既有粗陶卡片；阅读条目直接落在纸面上。 */
+.jywabi .juya-feed-item {
+  background: var(--jy-card);
+  border: 1px solid var(--jy-border);
+  border-radius: var(--jy-radius);
+  box-shadow: 0 2px 0 rgba(58, 52, 40, 0.05), 0 14px 28px -20px rgba(58, 52, 40, 0.25);
+}
+
+.jywabi .juya-entry {
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.jywabi .juya-masthead h1 {
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+/* 长概览在可用版心内按行分成双列；容器查询随内容区缩放后的实际宽度退化为单列。 */
+.jywabi .juya-issue {
+  container-type: inline-size;
+}
+
+.jywabi .juya-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  row-gap: 6px;
+}
+
+.jywabi .juya-overview li {
+  min-width: 0;
+}
+
+.jywabi .juya-overview li > :not(.juya-index) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@container (max-width: 639px) {
+  .jywabi .juya-overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.jywabi .juya-index {
+  background: transparent;
+  color: var(--jy-index-text);
+  border: 1px solid var(--jy-accent);
+  border-radius: 46% 54% 52% 48% / 48% 46% 54% 52%;
+}
+
+.jywabi .juya-section > h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+}
+
+.jywabi .juya-section > h2::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--jy-accent);
+  flex: none;
+}
+
+.jywabi .juya-lead {
+  margin-bottom: 12px;
+  padding: 4px 0 4px 14px;
+  border-left: 2px solid var(--jy-accent);
+  background: transparent;
+  border-radius: 0;
+  color: var(--jy-wabi-lead-text);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* 正文轴线保持稳定；无首行缩进，以段间留白分节，并允许长 URL 在窄窗断行。 */
+.jywabi .juya-entry p:not(.juya-links-label) {
+  margin-bottom: 12px;
+  font-size: 16px;
+  line-height: 1.85;
+  text-indent: 0;
+  overflow-wrap: anywhere;
+}
+
+/* 阅读页工艺封面：局部炭纸/和纸纤维、浅幅毛边、分层纸影和粗陶拓痕。
+   颜色只属于阅读页；订阅页继续由 .jywabi 的原有材质规则承载。 */
+[data-juya-variant='wabi-light'].jywabi.wabi-reading-craft {
+  --wabi-sheet: #f4f1e8;
+  --wabi-sheet-edge: #d6cfbf;
+  --wabi-sheet-fiber: rgba(97, 83, 62, 0.13);
+  --wabi-edge-wash: rgba(111, 97, 74, 0.14);
+  --wabi-paper-shadow: rgba(56, 48, 36, 0.18);
+  --wabi-slip: #ece7da;
+  --wabi-slip-edge: #d4caba;
+  --wabi-stamp-edge: #a5654a;
+  --wabi-stamp-wash: rgba(165, 101, 74, 0.06);
+  --wabi-stamp-inset: rgba(130, 68, 47, 0.36);
+  --wabi-rub-body: #a77859;
+  --wabi-rub-groove: #705640;
+  --wabi-rub-scratch: #f2e3cf;
+  --wabi-display: '华文行楷', STXingkai, 'KaiTi', '楷体', '楷体_GB2312', 'Noto Serif SC', serif;
+  --wabi-serif: 'SimSun', 'Songti SC', 'Noto Serif SC', serif;
+}
+
+[data-juya-variant='wabi-dark'].jywabi.wabi-reading-craft {
+  --wabi-sheet: #24221d;
+  --wabi-sheet-edge: #454034;
+  --wabi-sheet-fiber: rgba(204, 190, 162, 0.11);
+  --wabi-edge-wash: rgba(0, 0, 0, 0.38);
+  --wabi-paper-shadow: rgba(0, 0, 0, 0.58);
+  --wabi-slip: #2b2923;
+  --wabi-slip-edge: #4b4539;
+  --wabi-stamp-edge: #b37a5e;
+  --wabi-stamp-wash: rgba(179, 122, 94, 0.08);
+  --wabi-stamp-inset: rgba(227, 195, 164, 0.32);
+  --wabi-rub-body: #8b7b65;
+  --wabi-rub-groove: #49443a;
+  --wabi-rub-scratch: #c8b89c;
+  --wabi-display: '华文行楷', STXingkai, 'KaiTi', '楷体', '楷体_GB2312', 'Noto Serif SC', serif;
+  --wabi-serif: 'SimSun', 'Songti SC', 'Noto Serif SC', serif;
+}
+
+.wabi-reading-craft {
+  position: relative;
+  isolation: isolate;
+  background-image: none;
+}
+
+.wabi-reading-craft::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse at 0% 10%, var(--wabi-edge-wash), transparent 34%),
+    radial-gradient(ellipse at 100% 86%, var(--wabi-edge-wash), transparent 32%),
+    linear-gradient(164deg, var(--wabi-sheet-fiber) 0 38%, transparent 40%),
+    linear-gradient(12deg, var(--wabi-sheet-fiber) 0 32%, transparent 34%),
+    linear-gradient(174deg, var(--wabi-sheet-fiber) 0 46%, transparent 48%),
+    linear-gradient(9deg, var(--wabi-sheet-fiber) 0 35%, transparent 37%);
+  background-repeat: no-repeat;
+  background-size: 360px 280px, 340px 320px, 106px 1px, 82px 1px, 124px 1px, 71px 1px;
+  background-position: left top, right bottom, left 4% top 22%, left 9% top 43%, right 8% top 68%, right 4% bottom 17%;
+  -webkit-mask-image: linear-gradient(90deg, #000 0 8%, rgba(0, 0, 0, 0.7) 18%, transparent 35%, transparent 65%, rgba(0, 0, 0, 0.7) 84%, #000 100%);
+  mask-image: linear-gradient(90deg, #000 0 8%, rgba(0, 0, 0, 0.7) 18%, transparent 35%, transparent 65%, rgba(0, 0, 0, 0.7) 84%, #000 100%);
+}
+
+.wabi-reading-craft > .juya-issue {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: auto;
+  max-width: 808px;
+  margin: 18px auto 52px;
+  padding: 32px 24px 64px;
+  background: transparent;
+  box-shadow:
+    0 2px 0 rgba(56, 48, 36, 0.12),
+    0 7px 0 -3px var(--wabi-paper-shadow),
+    0 26px 44px -24px var(--wabi-paper-shadow);
+}
+
+.wabi-reading-craft > .juya-issue::before,
+.wabi-reading-craft > .juya-issue::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  clip-path: polygon(
+    0.32% 0.08%, 22% 0, 48% 0.16%, 76% 0, 99.68% 0.11%,
+    99.83% 19%, 99.56% 41%, 99.78% 63%, 99.46% 83%, 99.7% 100%,
+    73% 99.84%, 48% 100%, 24% 99.88%, 0.34% 100%,
+    0.12% 78%, 0.4% 57%, 0.1% 35%, 0.35% 16%
+  );
+}
+
+.wabi-reading-craft > .juya-issue::before {
+  z-index: -2;
+  border: 1px solid var(--wabi-sheet-edge);
+  background: var(--wabi-sheet);
+}
+
+.wabi-reading-craft > .juya-issue::after {
+  z-index: -1;
+  opacity: 0.7;
+  background-image:
+    radial-gradient(ellipse at 1% 48%, var(--wabi-sheet-fiber), transparent 38%),
+    radial-gradient(ellipse at 99% 62%, var(--wabi-sheet-fiber), transparent 36%),
+    linear-gradient(157deg, var(--wabi-sheet-fiber) 0 35%, transparent 37%),
+    linear-gradient(16deg, var(--wabi-sheet-fiber) 0 42%, transparent 44%),
+    linear-gradient(171deg, var(--wabi-sheet-fiber) 0 38%, transparent 40%);
+  background-repeat: no-repeat;
+  background-size: 108px 210px, 112px 240px, 72px 1px, 95px 1px, 62px 1px;
+  background-position: left center, right center, left 2% top 38px, right 7% top 54%, left 4% bottom 28px;
+  -webkit-mask-image: linear-gradient(90deg, #000 0 7%, rgba(0, 0, 0, 0.56) 17%, transparent 34%, transparent 66%, rgba(0, 0, 0, 0.56) 84%, #000 100%);
+  mask-image: linear-gradient(90deg, #000 0 7%, rgba(0, 0, 0, 0.56) 17%, transparent 34%, transparent 66%, rgba(0, 0, 0, 0.56) 84%, #000 100%);
+}
+
+.wabi-reading-craft > .juya-issue > * {
+  position: relative;
+  z-index: 1;
+}
+
+.wabi-reading-craft-masthead {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 16px;
+  min-height: 216px;
+  margin: 0 -8px 38px;
+  padding: 26px 16px 38px;
+  border-bottom: 1px solid var(--wabi-sheet-edge);
+  container-type: inline-size;
+}
+
+.jywabi.wabi-reading-craft .wabi-reading-craft-title {
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+  grid-row: 1;
+  max-width: 100%;
+  margin: 0;
+  color: var(--jy-heading);
+  font-family: var(--wabi-display);
+  font-size: clamp(40px, 8.4cqi, 68px);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: 0.025em;
+  overflow-wrap: anywhere;
+}
+
+.wabi-reading-craft-date {
+  position: relative;
+  z-index: 1;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: center;
+  padding-inline-start: 8px;
+  border-inline-start: 1px solid var(--wabi-stamp-edge);
+  color: var(--jy-heading);
+  font-family: var(--wabi-serif);
+  font-size: 13px;
+  line-height: 1.35;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-orientation: upright;
+  writing-mode: vertical-rl;
+}
+
+.wabi-reading-craft-rubbing {
+  position: absolute;
+  z-index: 0;
+  left: 5px;
+  bottom: 4px;
+  width: calc(100% - 40px);
+  height: 92px;
+  overflow: visible;
+  pointer-events: none;
+  /* Fixed-seed alpha noise breaks the imprint into porous, dry-brushed fragments. */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='65' result='noise'/%3E%3CfeColorMatrix in='noise' values='0%200%200%200%200%200%200%200%200%200%200%200%200%200%200%201%200%200%200%200' result='alpha'/%3E%3CfeComponentTransfer in='alpha'%3E%3CfeFuncA type='discrete' tableValues='0%20.16%20.48%20.82%201'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='72' height='72' fill='white' filter='url(%23grain)'/%3E%3C/svg%3E");
+  mask-size: 72px 72px;
+  mask-repeat: repeat;
+}
+
+.wabi-reading-craft-rubbing-body {
+  fill: var(--wabi-rub-body);
+  opacity: 0.36;
+}
+
+.wabi-reading-craft-rubbing-groove {
+  fill: none;
+  stroke: var(--wabi-rub-groove);
+  stroke-width: 2.4px;
+  stroke-linecap: round;
+  opacity: 0.66;
+}
+
+.wabi-reading-craft-rubbing-scratch {
+  fill: none;
+  stroke: var(--wabi-rub-scratch);
+  stroke-width: 1.35px;
+  stroke-linecap: round;
+  opacity: 0.82;
+}
+
+.wabi-reading-craft .juya-section > h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 16px 7px 10px;
+  border-inline-start: 3px double var(--wabi-stamp-edge);
+  border-bottom: 1px solid var(--wabi-slip-edge);
+  background: linear-gradient(90deg, var(--wabi-slip), transparent 88%);
+  color: var(--jy-heading);
+  font-family: var(--wabi-serif);
+  font-size: 21px;
+  letter-spacing: 0.16em;
+}
+
+.wabi-reading-craft .juya-section > h2::before {
+  width: 18px;
+  height: 1px;
+  border-radius: 0;
+  background: var(--wabi-stamp-edge);
+}
+
+.jywabi.wabi-reading-craft .juya-index {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25em;
+  height: 2.15em;
+  min-width: 2.25em;
+  padding: 0;
+  border: 1px solid var(--wabi-stamp-edge);
+  border-radius: 37% 55% 43% 58% / 46% 38% 59% 51%;
+  background-color: var(--wabi-stamp-wash);
+  box-shadow: inset 0 0 0 1px var(--wabi-stamp-inset);
+  color: var(--jy-index-text);
+  font-family: var(--wabi-serif);
+  font-size: 12px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+@media (max-width: 640px) {
+  .wabi-reading-craft > .juya-issue {
+    width: auto;
+    margin: 12px auto 42px;
+    padding: 24px 14px 50px;
+  }
+
+  .wabi-reading-craft-masthead {
+    grid-template-columns: minmax(0, 1fr) 28px;
+    gap: 10px;
+    min-height: 194px;
+    margin: 0 -6px 32px;
+    padding: 20px 12px 34px;
+  }
+
+  .jywabi.wabi-reading-craft .wabi-reading-craft-title {
+    font-size: clamp(36px, 8.6cqi, 52px);
+  }
+
+  .wabi-reading-craft-date {
+    padding-inline-start: 6px;
+    font-size: 12px;
+  }
+
+  .wabi-reading-craft-rubbing {
+    height: 76px;
+  }
+
+  .wabi-reading-craft .juya-section > h2 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 380px) {
+  .wabi-reading-craft-masthead {
+    grid-template-columns: minmax(0, 1fr) 24px;
+    gap: 8px;
+  }
+
+  .jywabi.wabi-reading-craft .wabi-reading-craft-title {
+    font-size: clamp(34px, 8.4cqi, 42px);
+    letter-spacing: 0;
+  }
+
+  .wabi-reading-craft-date {
+    padding-inline-start: 4px;
+    font-size: 11px;
+  }
+}
+
+/* 图片两列有机圆角网格 */
+.jywabi .juya-media-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.jywabi .juya-entry .jywabi-figure {
+  width: fit-content;
+  max-width: 100%;
+  margin: 16px 0 18px;
+}
+
+.jywabi .jywabi-figure img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border: 1px solid var(--jy-border);
+  border-radius: var(--jy-radius, 8px);
+}
+
+.jywabi .jywabi-figure figcaption {
+  max-width: 100%;
+  margin-top: 7px;
+  color: var(--jy-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* 订阅封面采用较矮的横幅；featured 继续使用加大版粗陶圆角。 */
+.jywabi .juya-feed-cover {
+  aspect-ratio: 16 / 9;
+}
+
+.jywabi .juya-feed-featured {
+  border-radius: 28px 8px 28px 8px;
+}
+
+/* 期号悬停用陶土边线反馈，不改变卡片或封面的几何。 */
+.jywabi .juya-feed-item:hover {
+  transform: none;
+  border-color: var(--jy-accent);
+}
+
+.jywabi .juya-feed-item:focus-visible {
+  outline: 2px solid var(--jy-focus);
+  outline-offset: 2px;
+}
+
+.jywabi .juya-feed-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.jywabi .juya-feed-body {
+  width: 100%;
+  min-width: 0;
+  padding: 16px 18px 10px;
+}
+
+.jywabi .juya-feed-meta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.jywabi .juya-feed-meta-unread {
+  min-height: 6px;
+  padding-left: 14px;
+}
+
+.jywabi .juya-feed-meta-unread .juya-feed-read-dot {
+  position: absolute;
+  top: 5px;
+  left: 0;
+}
+
+.jywabi .juya-feed-meta .juya-feed-date,
+.jywabi .juya-feed-meta .juya-feed-source {
+  max-width: 100%;
+  min-width: 0;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.jywabi .juya-feed-meta .juya-feed-source {
+  flex: 0 1 auto;
+  padding: 1px 6px;
+}
+
+.jywabi .juya-feed-title {
+  line-height: 1.35;
+}
+
+.jywabi .juya-feed-title > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.jywabi .juya-feed-summary {
+  display: block;
+  padding: 8px 18px 16px;
+}
+
+.jywabi .juya-feed-featured .juya-feed-body {
+  padding: 18px 20px 10px;
+}
+
+.jywabi .juya-feed-featured .juya-feed-summary {
+  padding: 10px 20px 18px;
+}
+
+.jywabi .juya-feed-compact .juya-feed-item {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+}
+
+.jywabi .juya-feed-compact .juya-feed-body {
+  flex: 1;
+  padding: 0;
+}
+
+.jywabi .juya-feed-compact .juya-feed-cover {
+  width: 72px;
+  height: 40px;
+  aspect-ratio: auto;
+  border-bottom: none;
+  border-radius: var(--jy-radius);
+  flex: none;
+}
+
+.jywabi .juya-feed-grid > .juya-feed-empty {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .jywabi .juya-entry:nth-of-type(odd) {
+    margin-right: 0;
+  }
+  .jywabi .juya-entry:nth-of-type(even) {
+    margin-left: 0;
+  }
+}

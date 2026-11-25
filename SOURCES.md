@@ -7,3 +7,15 @@
 - 运行依赖按各自许可分发：DOMPurify 3.4.16 为 MPL-2.0 或 Apache-2.0，lucide-react 1.38.0 为 ISC，React / React DOM 19.2.8 和 Zustand 5.0.15 为 MIT。版本与完整依赖树以 `pnpm-lock.yaml` 为准；各包的许可文件随包提供。开发工具也有各自许可，例如 Playwright 和 TypeScript 为 Apache-2.0。
 
 快照不是完整离线包：页面和资源仍须加载，快照中图片可能来自外部。实时源能否被浏览器读取取决于上游响应和 CORS；见 [取数说明](docs/feed-behavior.md)。
+
+- 橘鸦八套定制风格的网页视觉与模板参考 [CaiYan12/opia-rss-reader commit `3db178c2a438ef607aff8e1ccc5e6e82124f167c`](https://github.com/CaiYan12/opia-rss-reader/commit/3db178c2a438ef607aff8e1ccc5e6e82124f167c)。该固定来源包含以下风格的 CSS 与模板：
+  - `folio`：`src/renderer/juya/juya.css` 479–870；`templates/folio.tsx`、`folio-feed-craft.tsx`。
+  - `y2k`：`src/renderer/juya/juya.css` 871–1219、2876–2936；`templates/y2k.tsx`、`y2k-feed-craft.tsx`、`parts.tsx`。
+  - `pop`：`src/renderer/juya/juya.css` 1220–1681；`templates/pop.tsx`、`pop-feed-craft.tsx`。
+  - `newsprint90s`：`src/renderer/juya/juya.css` 1682–2250；`templates/newsprint90s.tsx`、`newsprint90s-feed-craft.tsx`。
+  - `synthwave`：`src/renderer/juya/juya.css` 2251–2936；`templates/synthwave.tsx`、`synthwave-feed-craft.tsx`、`parts.tsx`。
+  - `nocturne`：`src/renderer/juya/juya.css` 2937–4889；`templates/nocturne.tsx`、`nocturne-feed-craft.tsx`、`parts.tsx`。
+  - `editorial`：`src/renderer/juya/juya.css` 4890–5325；`templates/editorial.tsx`、`editorial-feed-craft.tsx`。
+  - `wabi`：`src/renderer/juya/juya.css` 5326–6175；`templates/wabi.tsx`、`wabi-feed-craft.tsx`、`wabi-reading-craft.tsx`。
+
+来源所有者授权复用其 CSS 与模板视觉设计；AI 日报网页实现按本项目的数据与操作接口适配。桌面窗口、原生控件、应用内滚动和仅桌面 lightbox 行为不属于网页移植；来源代码与内容仍按其各自权利处理。

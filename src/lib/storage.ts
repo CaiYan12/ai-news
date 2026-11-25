@@ -30,10 +30,22 @@ export function loadPersisted(): PersistedState | null {
 	try {
 		const parsed = JSON.parse(raw) as Partial<PersistedState>;
 		if (!parsed || typeof parsed !== "object") return null;
+		const storedSettings = {
+			...DEFAULT_SETTINGS,
+			...(parsed.settings ?? {}),
+		};
+		const legacyStyleSettings = parsed.settings as
+			| Partial<Record<"juyaLightStyleId" | "juyaDarkStyleId", string>>
+			| undefined;
+		// Legacy card and dreamcore selections migrate in place on their existing color sides.
+		if (storedSettings.juyaLightStyleId === "card") storedSettings.juyaLightStyleId = "folio";
+		if (storedSettings.juyaDarkStyleId === "card") storedSettings.juyaDarkStyleId = "folio";
+		if (legacyStyleSettings?.juyaLightStyleId === "dreamcore") storedSettings.juyaLightStyleId = "synthwave";
+		if (legacyStyleSettings?.juyaDarkStyleId === "dreamcore") storedSettings.juyaDarkStyleId = "synthwave";
 		return {
 			version: 1,
 			// 逐字段收敛，避免旧版本缺字段导致下游 undefined
-			settings: { ...DEFAULT_SETTINGS, ...(parsed.settings ?? {}) },
+			settings: storedSettings,
 			articles: Array.isArray(parsed.articles) ? parsed.articles : [],
 			history:
 				parsed.history && typeof parsed.history === "object"
