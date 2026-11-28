@@ -38,7 +38,10 @@ const html = `<h1>橘鸦AI早报 2026-09-01</h1><h2>概览</h2>
 <h3>按标题定位</h3><p>正文没有编号或来源，也能通过标题定位。</p>
 <h3>只有概览提供来源</h3><p>从概览匹配后，仍可到正文查看来源。</p>
 <h3>第一条同号新闻 <code>#3</code></h3><p>同号新闻一的正文。</p>
-<h3>第二条同号新闻 <code>#3</code></h3><p>${"同号新闻二的正文。".repeat(100)}</p>`;
+<h3>第二条同号新闻 <code>#3</code></h3><p>${"同号新闻二的正文。".repeat(100)}</p>
+<hr><p>新闻内部的分隔线后仍有正文。</p>
+<hr><p><strong>提示</strong>：内容由AI辅助创作，可能存在<strong>幻觉</strong>和<strong>错误</strong>。</p>
+<hr><p><a href="https://example.com/full">查看网页全文</a> · <a href="https://example.com/issue.md">查看 Markdown</a></p>`;
 const xmlEscape = value => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 const feed = `<?xml version="1.0"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>橘鸦AI早报</title><item><title>2026-09-01</title><link>https://daily.juya.uk/issues/2026-09-01/</link><guid>https://daily.juya.uk/issues/2026-09-01/</guid><pubDate>Tue, 01 Sep 2026 01:36:00 GMT</pubDate><description>次序测试期号</description><content:encoded>${xmlEscape(html)}</content:encoded></item></channel></rss>`;
 const image = await readFile("public/avatar.webp");
@@ -81,6 +84,12 @@ try {
       const issue = page.locator("[data-zoom-content] [data-juya-variant]");
       await issue.waitFor();
       assert.equal(await issue.getAttribute("data-juya-variant"), expectedVariant);
+      const lastEntry = issue.locator(".juya-entry").last();
+      assert.match(await lastEntry.innerText(), /新闻内部的分隔线后仍有正文/);
+      const footer = issue.locator(".juya-issue > footer");
+      assert.equal(await footer.count(), 1, "an issue whose last entry has no related links still has a separate footer");
+      assert.doesNotMatch(await lastEntry.innerText(), /查看网页全文|查看 Markdown|内容由AI辅助创作/);
+      assert.match(await footer.innerText(), /内容由AI辅助创作/);
       const blocks = await issue.locator(".juya-entry").first().evaluate(entry =>
         [...entry.children].filter(node => node.matches("p:not(.juya-links-label), figure"))
           .map(node => node.matches("figure") ? node.querySelector("img")?.alt : node.textContent?.trim()));
@@ -130,6 +139,8 @@ try {
         [heading.getByRole("link", { name: "图文次序验证" }), "https://example.com/story"],
         [issue.locator(".juya-links").getByRole("link", { name: "原文" }), "https://example.com/ref"],
         [preservedSource, "https://example.com/overview-only"],
+        [footer.getByRole("link", { name: "查看网页全文" }), "https://example.com/full"],
+        [footer.getByRole("link", { name: "查看 Markdown" }), "https://example.com/issue.md"],
       ]) {
         const [sourcePage] = await Promise.all([context.waitForEvent("page"), link.click()]);
         await sourcePage.waitForURL(href);

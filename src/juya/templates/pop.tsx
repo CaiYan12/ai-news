@@ -1,5 +1,5 @@
 import { makeJuyaTemplate } from "./base";
-import { EntryTitle, ImageGrid, Lead, LinksBlock, OverviewItems, Paragraphs } from "./shared";
+import { EntryTitle, ImageGrid, IssueFooter, Lead, LinksBlock, OverviewItems, Paragraphs } from "./shared";
 import { PopFeedMasthead } from "./pop-feed-craft";
 import type { JuyaTemplate, JuyaIssueProps } from "../templateTypes";
 
@@ -48,6 +48,7 @@ function IssueView({ article, issue, onOpenLink, variantId }: JuyaIssueProps): J
 						))}
 					</section>
 				))}
+				<IssueFooter footer={issue.footer} />
 			</div>
 		</div>
 	);

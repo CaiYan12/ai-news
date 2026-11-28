@@ -1,5 +1,5 @@
 import { makeJuyaTemplate } from "./base";
-import { EntryBlocks, EntryTitle, OverviewItems } from "./shared";
+import { EntryBlocks, EntryTitle, IssueFooter, OverviewItems } from "./shared";
 import { NewsprintFeedMasthead } from "./newsprint90s-feed-craft";
 import type { JuyaIssueProps, JuyaTemplate } from "../templateTypes";
 
@@ -46,6 +46,7 @@ function IssueView({ article, issue, onOpenLink, variantId }: JuyaIssueProps): J
 						))}
 					</section>
 				))}
+				<IssueFooter footer={issue.footer} />
 			</div>
 		</div>
 	);

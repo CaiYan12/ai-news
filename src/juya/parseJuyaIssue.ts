@@ -48,6 +48,11 @@ export interface JuyaSection {
 	entries: JuyaEntry[];
 }
 
+interface JuyaIssueFooter {
+	notice: string | null;
+	links: JuyaLink[];
+}
+
 export interface JuyaIssue {
 	/** 期头（首个 h1） */
 	heading: string;
@@ -55,6 +60,7 @@ export interface JuyaIssue {
 	overview?: JuyaOverviewEntry[];
 	/** 全文栏目（概览除外） */
 	sections: JuyaSection[];
+	footer?: JuyaIssueFooter;
 }
 
 /** 从 code 元素文本提取编号：'#3' → '3'；无效返回 null */
@@ -166,6 +172,37 @@ function parseEntry(h3: Element, anchorId: string): JuyaEntry {
 	return entry;
 }
 
+/** 从末条新闻所在容器中提取期号页脚，新闻内部的分隔线仍由 parseEntry 处理。 */
+function extractIssueFooter(lastHeading: Element | undefined): JuyaIssueFooter | undefined {
+	if (lastHeading?.tagName !== "H3") return;
+	const paragraph = lastHeading.parentElement?.lastElementChild;
+	const divider = paragraph?.previousElementSibling;
+	if (paragraph?.tagName !== "P" || divider?.tagName !== "HR") return;
+
+	const links = [...paragraph.querySelectorAll(":scope > a[href]")].map((anchor) => ({
+		text: (anchor.textContent ?? "").trim(),
+		href: (anchor.getAttribute("href") ?? "").trim(),
+	}));
+	if (
+		links.length !== 2 ||
+		links[0].text !== "查看网页全文" ||
+		links[1].text !== "查看 Markdown" ||
+		links.some(({ href }) => !/^https?:\/\//i.test(href))
+	) return;
+
+	const previous = divider.previousElementSibling;
+	const notice =
+		previous?.tagName === "P" &&
+		previous.previousElementSibling?.tagName === "HR" &&
+		previous.firstElementChild?.tagName === "STRONG" &&
+		previous.firstElementChild.textContent?.trim() === "提示"
+			? previous
+			: null;
+	paragraph.remove();
+	notice?.remove();
+	return { notice: notice?.textContent?.trim() || null, links };
+}
+
 /** 解析橘鸦 content:encoded 为结构化语义模型；骨架缺失返回 null（整篇降级）。 */
 export function parseJuyaIssue(html: string): JuyaIssue | null {
 	if (!html || !html.trim()) return null;
@@ -186,6 +223,7 @@ export function parseJuyaIssue(html: string): JuyaIssue | null {
 
 	// 按文档顺序遍历 h2/h3，把 h3 条目归入其前方最近的 h2 栏目
 	const headings = [...body.querySelectorAll("h2, h3")];
+	const footer = extractIssueFooter(headings.at(-1));
 	let current: JuyaSection | null = null;
 
 	for (const h of headings) {
@@ -221,6 +259,7 @@ export function parseJuyaIssue(html: string): JuyaIssue | null {
 		heading,
 		sections: sections.filter((s) => s.entries.length > 0),
 	};
+	if (footer) issue.footer = footer;
 	if (overview) {
 		const entries = issue.sections.flatMap((section) => section.entries);
 		issue.overview = overview.map((item) => {

@@ -1,5 +1,5 @@
 import { makeJuyaTemplate } from "./base";
-import { EntrySplit, OverviewItems } from "./shared";
+import { EntrySplit, IssueFooter, OverviewItems } from "./shared";
 import { Scene } from "./scene";
 import type { JuyaTemplate, JuyaIssueProps } from "../templateTypes";
 import "../juya.css";
@@ -28,6 +28,7 @@ function IssueView({ article, issue, onOpenLink, variantId }: JuyaIssueProps): J
 						))}
 					</section>
 				))}
+				<IssueFooter footer={issue.footer} />
 			</div>
 		</div>
 	);

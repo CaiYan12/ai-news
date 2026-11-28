@@ -1,5 +1,22 @@
-import { useEffect, useRef } from "react";
-import type { JuyaEntry, JuyaOverviewEntry } from "../parseJuyaIssue";
+import { Fragment, useEffect, useRef } from "react";
+import type { JuyaEntry, JuyaIssue, JuyaOverviewEntry } from "../parseJuyaIssue";
+
+export function IssueFooter({ footer }: { footer: JuyaIssue["footer"] }): JSX.Element | null {
+	if (!footer) return null;
+	return (
+		<footer className="juya-issue-footer">
+			{footer.notice && <p>{footer.notice}</p>}
+			<p>
+				{footer.links.map(({ text, href }, index) => (
+					<Fragment key={text}>
+						{index > 0 && <span aria-hidden="true"> · </span>}
+						<a href={href} target="_blank" rel="noopener noreferrer">{text}</a>
+					</Fragment>
+				))}
+			</p>
+		</footer>
+	);
+}
 
 export function sourceHostname(sourceUrl: string): string {
 	if (!sourceUrl) return "";

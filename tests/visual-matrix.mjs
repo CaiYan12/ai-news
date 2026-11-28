@@ -89,6 +89,11 @@ try {
               assert.ok(await page.locator(".juya-issue").isVisible(), `${style}-${scheme} detail has a visible issue anchor`);
               assert.ok((await page.locator(".juya-masthead h1").first().innerText()).trim().length > 0, `${style}-${scheme} detail masthead has a title`);
               assert.ok(await page.locator(".juya-entry h3 a[href^='https://']").count() > 0, `${style}-${scheme} detail preserves an outbound source link`);
+              const footerLinks = page.locator(".juya-issue > footer").getByRole("link");
+              assert.deepEqual(await footerLinks.evaluateAll(links => links.map(link => link.href)), [
+                "https://daily.juya.uk/issues/2026-09-01/",
+                "https://daily.juya.uk/markdown/2026-09-01.md",
+              ], `${variant} renders the snapshot issue's footer links outside its entries`);
             }
             const imageState = await page.locator("[data-juya-variant] img").evaluateAll(images => images.map(img => ({src:img.currentSrc || img.src, complete:img.complete, naturalWidth:img.naturalWidth, naturalHeight:img.naturalHeight})));
             if (!historicalComparison) {

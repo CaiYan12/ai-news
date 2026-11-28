@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { makeJuyaTemplate } from "./base";
-import { EntryTitle, OverviewItems } from "./shared";
+import { EntryTitle, IssueFooter, OverviewItems } from "./shared";
 import type { JuyaContentBlock, JuyaEntry, JuyaImage, JuyaLink } from "../parseJuyaIssue";
 import type { JuyaIssueProps } from "../templateTypes";
 import "../folio.css";
@@ -120,6 +120,7 @@ function FolioIssue({ article, issue, onOpenLink, variantId }: JuyaIssueProps): 
 						))}
 					</section>
 				))}
+				<IssueFooter footer={issue.footer} />
 			</div>
 		</div>
 	);

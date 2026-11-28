@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { makeJuyaTemplate } from "./base";
-import { EntryTitle, Lead, LinksBlock, OverviewItems, sourceHostname } from "./shared";
+import { EntryTitle, IssueFooter, Lead, LinksBlock, OverviewItems, sourceHostname } from "./shared";
 import { EditorialFeedMasthead } from "./editorial-feed-craft";
 import type { JuyaContentBlock, JuyaEntry } from "../parseJuyaIssue";
 import type { JuyaIssueProps, JuyaTemplate } from "../templateTypes";
@@ -105,6 +105,7 @@ function EditorialIssue({ article, issue, onOpenLink, variantId }: JuyaIssueProp
 						))}
 					</section>
 				))}
+				<IssueFooter footer={issue.footer} />
 				{publicationDay && <footer className="juya-colophon">本期编辑 · 橘鸦日报 · {publicationDay}</footer>}
 			</div>
 		</div>

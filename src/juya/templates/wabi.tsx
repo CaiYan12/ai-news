@@ -1,5 +1,5 @@
 import { makeJuyaTemplate } from "./base";
-import { EntryTitle, Lead, LinksBlock, OverviewItems } from "./shared";
+import { EntryTitle, IssueFooter, Lead, LinksBlock, OverviewItems } from "./shared";
 import { WabiFeedMasthead } from "./wabi-feed-craft";
 import { WabiReadingMasthead } from "./wabi-reading-craft";
 import type { JuyaIssueProps, JuyaTemplate } from "../templateTypes";
@@ -42,6 +42,7 @@ function WabiIssue({ article, issue, onOpenLink, variantId }: JuyaIssueProps): J
 						})}
 					</section>
 				))}
+				<IssueFooter footer={issue.footer} />
 			</div>
 		</div>
 	);
